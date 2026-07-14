@@ -54,8 +54,13 @@
 
   .scroller{
     flex:1;
-    overflow:auto;
+    overflow:hidden;
     padding:20px 40px 30px;
+    display:flex;
+    justify-content:center;
+  }
+  .tree-wrap{
+    transform-origin:top center;
   }
 
   .tree, .tree ul, .tree li{
@@ -127,12 +132,11 @@
     border:1px solid #63101c;
     box-shadow:0 1px 2px rgba(36,26,28,0.08), 0 6px 16px -10px rgba(122,18,32,0.5);
     cursor:default;
-    transition:background .2s, box-shadow .2s, transform .2s;
+    transition:background .2s, box-shadow .2s;
   }
   .node:hover{
     background:var(--red-bright);
     box-shadow:0 0 0 1px rgba(122,18,32,0.25), 0 10px 26px -10px rgba(122,18,32,0.55);
-    transform:translateY(-2px);
   }
   .avatar{
     width:44px; height:44px;
@@ -176,6 +180,7 @@
   </div>
 
   <div class="scroller">
+    <div class="tree-wrap" id="treeWrap">
     <ul class="tree">
       <li>
         <div class="node root"><div class="avatar">AM</div><div class="name">Aris Bin Murad</div><div class="role">Director, Group IT</div></div>
@@ -227,6 +232,7 @@
         </ul>
       </li>
     </ul>
+    </div>
   </div>
 </div>
 
@@ -249,6 +255,18 @@
     node.addEventListener('mouseenter', function(){ highlight(node); });
   });
   document.querySelector('.scroller').addEventListener('mouseleave', clear);
+
+  var scroller = document.querySelector('.scroller');
+  var wrap = document.getElementById('treeWrap');
+  function fit(){
+    wrap.style.transform = 'scale(1)';
+    var natural = wrap.scrollWidth;
+    var available = scroller.clientWidth - 16;
+    var scale = Math.min(1, available / natural);
+    wrap.style.transform = 'scale(' + scale + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
 })();
 </script>
 </body>

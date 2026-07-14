@@ -26,15 +26,6 @@
     margin:0 auto;
     padding:28px 20px 40px;
   }
-  .label{
-    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
-    font-size:12px;
-    color:var(--ink-soft);
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    margin:0 0 12px;
-  }
-
   .stage{
     position:relative;
     width:100%;
@@ -108,16 +99,6 @@
     max-width:36ch;
   }
 
-  .credit{
-    position:absolute;
-    right:16px; bottom:14px;
-    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
-    font-size:10.5px;
-    color:rgba(124,136,150,0.75);
-    letter-spacing:0.02em;
-    pointer-events:none;
-  }
-
   .note{
     margin-top:18px;
     font-size:13px;
@@ -137,8 +118,6 @@
 <body>
 
 <div class="wrap">
-  <p class="label">Group IT · SharePoint hero embed</p>
-
   <div class="stage" id="stage">
     <canvas id="grid"></canvas>
     <div class="vignette"></div>
@@ -147,7 +126,6 @@
       <h1 class="wordmark">GROUP <span class="it">IT</span></h1>
       <p class="sub">Where the energy grid meets the network.</p>
     </div>
-    <div class="credit">◆ served from GitHub Pages</div>
   </div>
 
   <p class="note">Move your cursor over the banner — the grid brightens along your row and column, like current finding a path. This is a single self-contained <code>&lt;canvas&gt;</code> animation: host the file on GitHub Pages, then drop its URL into SharePoint's Embed web part.</p>

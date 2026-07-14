@@ -71,83 +71,44 @@
   .refresh.spin svg{ animation:spin .7s linear; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  .list{
+  .scroll{
     flex:1;
     overflow-y:auto;
     display:flex;
     flex-direction:column;
-    gap:8px;
+    gap:10px;
     padding-right:2px;
   }
-  a.item{
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    padding:9px 11px;
-    border-radius:8px;
-    background:var(--panel);
-    border:1px solid var(--line);
-    text-decoration:none;
-    color:var(--ink);
-    transition:border-color .15s, background .15s;
-  }
-  a.item:hover{
-    border-color:var(--red);
-    background:#fdeef0;
-  }
-  .thumb{
-    flex-shrink:0;
-    width:52px; height:52px;
-    border-radius:7px;
-    background:var(--red) center/cover no-repeat;
-    display:grid;
-    place-items:center;
-  }
-  .thumb svg{ width:18px; height:18px; opacity:0.9; }
-  .item-body{ min-width:0; flex:1; }
-  .item-title{
-    font-size:12px;
-    font-weight:600;
-    line-height:1.35;
-    margin:0 0 4px;
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
-  }
-  .item-meta{
-    font-size:10px;
-    color:var(--red);
-    font-weight:600;
-    display:flex;
-    gap:6px;
-    align-items:center;
-  }
-  .item-meta .src{ opacity:0.85; }
 
-  a.feature{
-    display:block;
+  /* --- hero carousel --- */
+  .hero{
     position:relative;
     flex-shrink:0;
-    height:132px;
+    height:150px;
     border-radius:10px;
     overflow:hidden;
-    text-decoration:none;
     background:var(--red);
   }
-  a.feature .feature-img{
+  .hero-slide{
+    position:absolute; inset:0;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .55s ease;
+  }
+  .hero-slide.active{ opacity:1; pointer-events:auto; }
+  .hero-img{
     position:absolute; inset:0;
     background:center/cover no-repeat;
     transform:scale(1);
-    transition:transform .35s ease;
+    transition:transform 6s ease;
   }
-  a.feature:hover .feature-img{ transform:scale(1.06); }
-  a.feature::before{
+  .hero-slide.active .hero-img{ transform:scale(1.08); }
+  .hero-slide::before{
     content:'';
     position:absolute; inset:0;
-    background:linear-gradient(to top, rgba(20,10,12,0.88) 0%, rgba(20,10,12,0.35) 45%, transparent 75%);
+    background:linear-gradient(to top, rgba(20,10,12,0.88) 0%, rgba(20,10,12,0.32) 48%, transparent 75%);
   }
-  .feature-tag{
+  .hero-tag{
     position:absolute;
     top:10px; left:10px;
     background:var(--red);
@@ -159,13 +120,15 @@
     text-transform:uppercase;
     padding:3px 8px;
     border-radius:5px;
+    z-index:1;
   }
-  .feature-body{
+  .hero-body{
     position:absolute; left:0; right:0; bottom:0;
     padding:10px 12px;
     color:#fff;
+    text-decoration:none;
   }
-  .feature-title{
+  .hero-title{
     font-size:14px;
     font-weight:700;
     line-height:1.3;
@@ -175,10 +138,30 @@
     -webkit-box-orient:vertical;
     overflow:hidden;
   }
-  .feature-meta{
+  .hero-meta{
     font-size:10.5px;
     color:rgba(255,255,255,0.85);
     font-weight:600;
+  }
+  .hero-dots{
+    position:absolute;
+    bottom:9px; right:11px;
+    display:flex;
+    gap:5px;
+    z-index:2;
+  }
+  .hero-dots button{
+    width:6px; height:6px;
+    padding:0;
+    border:0;
+    border-radius:3px;
+    background:rgba(255,255,255,0.45);
+    cursor:pointer;
+    transition:width .2s, background .2s;
+  }
+  .hero-dots button.active{
+    width:16px;
+    background:#fff;
   }
 
   .sub-label{
@@ -187,21 +170,59 @@
     letter-spacing:0.08em;
     text-transform:uppercase;
     color:var(--ink-soft);
-    margin:2px 0 0;
+    margin:0;
   }
 
-  a.item{
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  a.card{
+    display:flex;
+    flex-direction:column;
+    border-radius:8px;
+    overflow:hidden;
+    background:var(--panel);
+    border:1px solid var(--line);
+    text-decoration:none;
+    color:var(--ink);
+    transition:border-color .15s, background .15s;
     opacity:0;
     animation:tile-in .4s ease forwards;
     animation-delay:calc(var(--i, 0) * 60ms + 60ms);
   }
+  a.card:hover{
+    border-color:var(--red);
+    background:#fdeef0;
+  }
+  .card-img{
+    height:64px;
+    background:var(--red) center/cover no-repeat;
+    display:grid;
+    place-items:center;
+    flex-shrink:0;
+  }
+  .card-img svg{ width:18px; height:18px; opacity:0.9; }
+  .card-body{ padding:7px 9px 8px; }
+  .card-title{
+    font-size:11px;
+    font-weight:600;
+    line-height:1.3;
+    margin:0 0 4px;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .card-meta{
+    font-size:9px;
+    color:var(--red);
+    font-weight:600;
+  }
   @keyframes tile-in{
     from{ opacity:0; transform:translateY(6px); }
     to{ opacity:1; transform:translateY(0); }
-  }
-  @media (prefers-reduced-motion:reduce){
-    a.item{ opacity:1; animation:none; }
-    a.feature .feature-img{ transition:none; }
   }
 
   .status{
@@ -216,7 +237,6 @@
     background:linear-gradient(100deg, var(--panel) 30%, #f2e4e6 50%, var(--panel) 70%);
     background-size:220% 100%;
     animation:shimmer 1.3s ease-in-out infinite;
-    height:52px;
   }
   @keyframes shimmer{
     0%{ background-position:120% 0; }
@@ -225,6 +245,9 @@
   @media (prefers-reduced-motion:reduce){
     .skeleton{ animation:none; }
     .refresh.spin svg{ animation:none; }
+    a.card{ opacity:1; animation:none; }
+    .hero-img{ transition:none; }
+    .hero-slide.active .hero-img{ transform:none; }
   }
 </style>
 </head>
@@ -237,11 +260,15 @@
       <svg viewBox="0 0 24 24" fill="none"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
-  <div class="list" id="list">
-    <div class="skeleton" style="height:132px"></div>
-    <div class="skeleton" style="height:52px"></div>
-    <div class="skeleton" style="height:52px"></div>
-    <div class="skeleton" style="height:52px"></div>
+  <div class="scroll" id="scroll">
+    <div class="skeleton" style="height:150px"></div>
+    <div class="skeleton" style="height:14px; width:40%"></div>
+    <div class="grid">
+      <div class="skeleton" style="height:112px"></div>
+      <div class="skeleton" style="height:112px"></div>
+      <div class="skeleton" style="height:112px"></div>
+      <div class="skeleton" style="height:112px"></div>
+    </div>
   </div>
 </div>
 
@@ -249,9 +276,10 @@
 (function(){
   var FEED = 'https://api.rss2json.com/v1/api.json?rss_url=' +
     encodeURIComponent('https://www.theverge.com/rss/ai-artificial-intelligence/index.xml');
-  var list = document.getElementById('list');
+  var scroll = document.getElementById('scroll');
   var refreshBtn = document.getElementById('refreshBtn');
-  var timer = null;
+  var heroTimer = null;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function timeAgo(dateStr){
     var diff = Date.now() - new Date(dateStr).getTime();
@@ -272,90 +300,138 @@
     return item.thumbnail || (item.enclosure && item.enclosure.link) || extractImage(item) || '';
   }
 
-  function buildFeature(item){
-    var a = document.createElement('a');
-    a.className = 'feature';
-    a.href = item.link;
-    a.target = '_blank';
-    a.rel = 'noopener';
+  function buildHero(items){
+    var hero = document.createElement('div');
+    hero.className = 'hero';
 
-    var imgEl = document.createElement('div');
-    imgEl.className = 'feature-img';
-    var img = imageFor(item);
-    if (img) imgEl.style.backgroundImage = 'url(' + img + ')';
-    a.appendChild(imgEl);
+    items.forEach(function(item, i){
+      var slide = document.createElement('a');
+      slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
+      slide.href = item.link;
+      slide.target = '_blank';
+      slide.rel = 'noopener';
 
-    if (item.categories && item.categories[0]){
-      var tag = document.createElement('span');
-      tag.className = 'feature-tag';
-      tag.textContent = item.categories[0];
-      a.appendChild(tag);
+      var imgEl = document.createElement('div');
+      imgEl.className = 'hero-img';
+      var img = imageFor(item);
+      if (img) imgEl.style.backgroundImage = 'url(' + img + ')';
+      slide.appendChild(imgEl);
+
+      if (item.categories && item.categories[0]){
+        var tag = document.createElement('span');
+        tag.className = 'hero-tag';
+        tag.textContent = item.categories[0];
+        slide.appendChild(tag);
+      }
+
+      var body = document.createElement('div');
+      body.className = 'hero-body';
+      var title = document.createElement('p');
+      title.className = 'hero-title';
+      title.textContent = item.title;
+      var meta = document.createElement('div');
+      meta.className = 'hero-meta';
+      meta.textContent = (item.author || 'The Verge') + ' · ' + timeAgo(item.pubDate);
+      body.appendChild(title);
+      body.appendChild(meta);
+      slide.appendChild(body);
+
+      hero.appendChild(slide);
+    });
+
+    var dots = document.createElement('div');
+    dots.className = 'hero-dots';
+    items.forEach(function(item, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = i === 0 ? 'active' : '';
+      b.setAttribute('aria-label', 'Show story ' + (i + 1));
+      b.addEventListener('click', function(){ goToSlide(hero, i); });
+      dots.appendChild(b);
+    });
+    hero.appendChild(dots);
+
+    if (!reduced){
+      hero.addEventListener('mouseenter', function(){ clearInterval(heroTimer); });
+      hero.addEventListener('mouseleave', function(){ startAutoRotate(hero, items.length); });
+      startAutoRotate(hero, items.length);
     }
 
-    var body = document.createElement('div');
-    body.className = 'feature-body';
-    var title = document.createElement('p');
-    title.className = 'feature-title';
-    title.textContent = item.title;
-    var meta = document.createElement('div');
-    meta.className = 'feature-meta';
-    meta.textContent = (item.author || 'The Verge') + ' · ' + timeAgo(item.pubDate);
-    body.appendChild(title);
-    body.appendChild(meta);
-    a.appendChild(body);
-    return a;
+    return hero;
   }
 
-  function buildItem(item, index){
+  function goToSlide(hero, index){
+    var slides = hero.querySelectorAll('.hero-slide');
+    var dots = hero.querySelectorAll('.hero-dots button');
+    slides.forEach(function(s, i){ s.classList.toggle('active', i === index); });
+    dots.forEach(function(d, i){ d.classList.toggle('active', i === index); });
+    hero.dataset.current = index;
+  }
+
+  function startAutoRotate(hero, count){
+    clearInterval(heroTimer);
+    heroTimer = setInterval(function(){
+      var current = parseInt(hero.dataset.current || '0', 10);
+      goToSlide(hero, (current + 1) % count);
+    }, 5500);
+  }
+
+  function buildCard(item, index){
     var a = document.createElement('a');
-    a.className = 'item';
+    a.className = 'card';
     a.style.setProperty('--i', index);
     a.href = item.link;
     a.target = '_blank';
     a.rel = 'noopener';
-    var thumb = document.createElement('div');
-    thumb.className = 'thumb';
+
+    var imgWrap = document.createElement('div');
+    imgWrap.className = 'card-img';
     var img = imageFor(item);
     if (img){
-      thumb.style.backgroundImage = 'url(' + img + ')';
+      imgWrap.style.backgroundImage = 'url(' + img + ')';
     } else {
-      thumb.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="#fff" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="#fff"/><path d="M4 16l5-4 4 3 3-2 4 3" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+      imgWrap.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="#fff" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="#fff"/><path d="M4 16l5-4 4 3 3-2 4 3" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
     }
 
     var body = document.createElement('div');
-    body.className = 'item-body';
+    body.className = 'card-body';
     var title = document.createElement('p');
-    title.className = 'item-title';
+    title.className = 'card-title';
     title.textContent = item.title;
     var meta = document.createElement('div');
-    meta.className = 'item-meta';
-    var src = document.createElement('span');
-    src.className = 'src';
-    src.textContent = (item.author || 'The Verge') + ' · ' + timeAgo(item.pubDate);
-    meta.appendChild(src);
+    meta.className = 'card-meta';
+    meta.textContent = timeAgo(item.pubDate);
     body.appendChild(title);
     body.appendChild(meta);
 
-    a.appendChild(thumb);
+    a.appendChild(imgWrap);
     a.appendChild(body);
     return a;
   }
 
   function render(items){
-    list.innerHTML = '';
+    scroll.innerHTML = '';
     if (!items.length) return;
-    list.appendChild(buildFeature(items[0]));
+
+    clearInterval(heroTimer);
+    scroll.appendChild(buildHero(items.slice(0, 3)));
+
     var sub = document.createElement('p');
     sub.className = 'sub-label';
     sub.textContent = 'More AI news';
-    list.appendChild(sub);
-    items.slice(1, 8).forEach(function(item, i){
-      list.appendChild(buildItem(item, i));
+    scroll.appendChild(sub);
+
+    var grid = document.createElement('div');
+    grid.className = 'grid';
+    items.slice(3, 9).forEach(function(item, i){
+      grid.appendChild(buildCard(item, i));
     });
+    scroll.appendChild(grid);
   }
 
   function showStatus(msg){
-    list.innerHTML = '<div class="status">' + msg + '</div>';
+    clearInterval(heroTimer);
+    scroll.innerHTML = '<div class="status">' + msg + '</div>';
   }
 
   function load(){
@@ -379,7 +455,7 @@
 
   refreshBtn.addEventListener('click', load);
   load();
-  timer = setInterval(load, 20 * 60 * 1000);
+  setInterval(load, 20 * 60 * 1000);
 })();
 </script>
 </body>

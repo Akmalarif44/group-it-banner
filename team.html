@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Group IT — team</title>
+<style>
+  :root{
+    --void:#ffffff;
+    --panel:#ffffff;
+    --ink:#241a1c;
+    --ink-soft:#8a7477;
+    --red:#7a1220;
+    --red-bright:#c81e34;
+    --line-dim:rgba(122,18,32,0.28);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; overflow:hidden; }
+  body{
+    margin:0;
+    background:var(--void);
+    color:var(--ink);
+    font-family:-apple-system,"Segoe UI",system-ui,sans-serif;
+  }
+  .page{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    padding:26px 0 10px;
+  }
+  .head{
+    text-align:center;
+    flex-shrink:0;
+    margin-bottom:6px;
+  }
+  .tag{
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+  }
+  .title{
+    margin:0;
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-weight:700;
+    font-size:clamp(24px,3.4vw,36px);
+    letter-spacing:0.01em;
+  }
+  .title .it{
+    color:var(--red);
+  }
+
+  .scroller{
+    flex:1;
+    overflow:auto;
+    padding:20px 40px 30px;
+  }
+
+  .tree, .tree ul, .tree li{
+    list-style:none;
+    margin:0;
+    padding:0;
+    position:relative;
+  }
+  .tree{
+    display:flex;
+    justify-content:center;
+    min-width:max-content;
+  }
+  .tree ul{
+    display:flex;
+    justify-content:center;
+    padding-top:26px;
+  }
+  .tree li{
+    text-align:center;
+    padding:26px 10px 0;
+  }
+  .tree li::before,
+  .tree li::after{
+    content:'';
+    position:absolute;
+    top:0; right:50%;
+    width:50%; height:26px;
+    border-top:2px solid var(--line-dim);
+    transition:border-color .25s;
+  }
+  .tree li::after{
+    right:auto; left:50%;
+    border-top:2px solid var(--line-dim);
+    border-left:2px solid var(--line-dim);
+  }
+  .tree li::before{ border-right:2px solid var(--line-dim); }
+  .tree li:only-child::before,
+  .tree li:only-child::after{ display:none; }
+  .tree li:only-child{ padding-top:0; }
+  .tree li:first-child::before,
+  .tree li:last-child::after{ border:0 none; }
+  .tree li:last-child::before{ border-radius:0 5px 0 0; }
+  .tree li:first-child::after{ border-radius:5px 0 0 0; }
+  .tree ul ul::before{
+    content:'';
+    position:absolute;
+    top:0; left:50%;
+    width:0; height:26px;
+    border-left:2px solid var(--line-dim);
+    transition:border-color .25s;
+  }
+  .tree > ul{ padding-top:0; }
+  .tree > ul::before{ display:none; }
+
+  .tree li.lit::before,
+  .tree li.lit::after{ border-color:var(--red-bright); }
+  .tree ul.lit::before{ border-color:var(--red-bright); }
+
+  .node{
+    display:inline-flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    width:132px;
+    padding:12px 8px 10px;
+    border-radius:12px;
+    background:var(--red);
+    border:1px solid #63101c;
+    box-shadow:0 1px 2px rgba(36,26,28,0.08), 0 6px 16px -10px rgba(122,18,32,0.5);
+    cursor:default;
+    transition:background .2s, box-shadow .2s, transform .2s;
+  }
+  .node:hover{
+    background:var(--red-bright);
+    box-shadow:0 0 0 1px rgba(122,18,32,0.25), 0 10px 26px -10px rgba(122,18,32,0.55);
+    transform:translateY(-2px);
+  }
+  .avatar{
+    width:44px; height:44px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:#ffffff;
+    color:var(--red);
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-weight:700;
+    font-size:14px;
+    border:1px solid rgba(255,255,255,0.5);
+  }
+  .name{
+    font-size:11.5px;
+    font-weight:600;
+    line-height:1.25;
+    color:#ffffff;
+  }
+  .role{
+    font-size:10px;
+    color:rgba(255,255,255,0.82);
+    line-height:1.25;
+  }
+
+  .node.root{ width:168px; padding:16px 10px 14px; }
+  .node.root .avatar{
+    width:60px; height:60px; font-size:18px;
+    box-shadow:0 0 0 3px rgba(255,255,255,0.3);
+  }
+  .node.root .name{ font-size:13px; }
+  .node.root .role{ font-size:10.5px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="head">
+    <p class="tag">Petra Energy Berhad</p>
+    <h1 class="title">GROUP <span class="it">IT</span> TEAM</h1>
+  </div>
+
+  <div class="scroller">
+    <ul class="tree">
+      <li>
+        <div class="node root"><div class="avatar">AM</div><div class="name">Aris Bin Murad</div><div class="role">Director, Group IT</div></div>
+        <ul>
+
+          <li>
+            <div class="node"><div class="avatar">PS</div><div class="name">Peter Sarachandran</div><div class="role">ISMS Manager</div></div>
+            <ul>
+              <li><div class="node"><div class="avatar">NA</div><div class="name">Nurul Annisa Aeri Azahar</div><div class="role">Exec. Information Security</div></div></li>
+            </ul>
+          </li>
+
+          <li>
+            <div class="node"><div class="avatar">SY</div><div class="name">Saufilbadli Ya'cob</div><div class="role">Head, ERP Excellence</div></div>
+            <ul>
+              <li><div class="node"><div class="avatar">AK</div><div class="name">Amir Erwan Ahmad Khalili</div><div class="role">Senior SAP Specialist</div></div></li>
+              <li><div class="node"><div class="avatar">AM</div><div class="name">Amri Akmar Mohd Kasim</div><div class="role">Senior SAP Finance Specialist</div></div></li>
+            </ul>
+          </li>
+
+          <li>
+            <div class="node"><div class="avatar">AY</div><div class="name">Abu Bin Yusup</div><div class="role">Head, IT Service Delivery</div></div>
+            <ul>
+              <li>
+                <div class="node"><div class="avatar">AH</div><div class="name">Mohamad Azri Hashim</div><div class="role">Apps &amp; Technology Specialist</div></div>
+                <ul>
+                  <li><div class="node"><div class="avatar">AM</div><div class="name">Abdul Mujid Mohamad</div><div class="role">Exec. IT SD Labuan</div></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="node"><div class="avatar">AZ</div><div class="name">Mohd Azizuddin Mohd Zelani</div><div class="role">Team Leader IT SD HQ/KL</div></div>
+                <ul>
+                  <li><div class="node"><div class="avatar">MA</div><div class="name">Muhammad Akmalarif Khalimi</div><div class="role">Exec. IT SD HQ/KL</div></div></li>
+                </ul>
+              </li>
+              <li>
+                <div class="node"><div class="avatar">AK</div><div class="name">Alex Kong</div><div class="role">Team Leader IT SD Miri</div></div>
+                <ul>
+                  <li><div class="node"><div class="avatar">FA</div><div class="name">Fatin Nur Azzirah Ismail</div><div class="role">Exec. IT SD Miri</div></div></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+
+          <li><div class="node"><div class="avatar">RF</div><div class="name">Raihana Firdaus Abdul Rahim</div><div class="role">Executive PMO</div></div></li>
+
+          <li><div class="node"><div class="avatar">RD</div><div class="name">Ryan Dawil</div><div class="role">AI Engineer</div></div></li>
+
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function(){
+  function clear(){
+    document.querySelectorAll('.tree .lit').forEach(function(el){ el.classList.remove('lit'); });
+  }
+  function highlight(node){
+    clear();
+    var el = node.closest('li');
+    while (el){
+      el.classList.add('lit');
+      var parentUl = el.parentElement;
+      if (parentUl && parentUl.tagName === 'UL'){ parentUl.classList.add('lit'); }
+      el = parentUl ? parentUl.closest('li') : null;
+    }
+  }
+  document.querySelectorAll('.node').forEach(function(node){
+    node.addEventListener('mouseenter', function(){ highlight(node); });
+  });
+  document.querySelector('.scroller').addEventListener('mouseleave', clear);
+})();
+</script>
+</body>
+</html>

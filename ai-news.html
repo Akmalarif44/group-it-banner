@@ -97,13 +97,13 @@
   }
   .thumb{
     flex-shrink:0;
-    width:56px; height:56px;
+    width:52px; height:52px;
     border-radius:7px;
     background:var(--red) center/cover no-repeat;
     display:grid;
     place-items:center;
   }
-  .thumb svg{ width:20px; height:20px; opacity:0.9; }
+  .thumb svg{ width:18px; height:18px; opacity:0.9; }
   .item-body{ min-width:0; flex:1; }
   .item-title{
     font-size:12px;
@@ -124,6 +124,85 @@
     align-items:center;
   }
   .item-meta .src{ opacity:0.85; }
+
+  a.feature{
+    display:block;
+    position:relative;
+    flex-shrink:0;
+    height:132px;
+    border-radius:10px;
+    overflow:hidden;
+    text-decoration:none;
+    background:var(--red);
+  }
+  a.feature .feature-img{
+    position:absolute; inset:0;
+    background:center/cover no-repeat;
+    transform:scale(1);
+    transition:transform .35s ease;
+  }
+  a.feature:hover .feature-img{ transform:scale(1.06); }
+  a.feature::before{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(to top, rgba(20,10,12,0.88) 0%, rgba(20,10,12,0.35) 45%, transparent 75%);
+  }
+  .feature-tag{
+    position:absolute;
+    top:10px; left:10px;
+    background:var(--red);
+    color:#fff;
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:5px;
+  }
+  .feature-body{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:10px 12px;
+    color:#fff;
+  }
+  .feature-title{
+    font-size:14px;
+    font-weight:700;
+    line-height:1.3;
+    margin:0 0 4px;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .feature-meta{
+    font-size:10.5px;
+    color:rgba(255,255,255,0.85);
+    font-weight:600;
+  }
+
+  .sub-label{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:2px 0 0;
+  }
+
+  a.item{
+    opacity:0;
+    animation:tile-in .4s ease forwards;
+    animation-delay:calc(var(--i, 0) * 60ms + 60ms);
+  }
+  @keyframes tile-in{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion:reduce){
+    a.item{ opacity:1; animation:none; }
+    a.feature .feature-img{ transition:none; }
+  }
 
   .status{
     font-size:11.5px;
@@ -159,10 +238,10 @@
     </button>
   </div>
   <div class="list" id="list">
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
-    <div class="skeleton"></div>
+    <div class="skeleton" style="height:132px"></div>
+    <div class="skeleton" style="height:52px"></div>
+    <div class="skeleton" style="height:52px"></div>
+    <div class="skeleton" style="height:52px"></div>
   </div>
 </div>
 
@@ -189,40 +268,89 @@
     return match ? match[1] : '';
   }
 
+  function imageFor(item){
+    return item.thumbnail || (item.enclosure && item.enclosure.link) || extractImage(item) || '';
+  }
+
+  function buildFeature(item){
+    var a = document.createElement('a');
+    a.className = 'feature';
+    a.href = item.link;
+    a.target = '_blank';
+    a.rel = 'noopener';
+
+    var imgEl = document.createElement('div');
+    imgEl.className = 'feature-img';
+    var img = imageFor(item);
+    if (img) imgEl.style.backgroundImage = 'url(' + img + ')';
+    a.appendChild(imgEl);
+
+    if (item.categories && item.categories[0]){
+      var tag = document.createElement('span');
+      tag.className = 'feature-tag';
+      tag.textContent = item.categories[0];
+      a.appendChild(tag);
+    }
+
+    var body = document.createElement('div');
+    body.className = 'feature-body';
+    var title = document.createElement('p');
+    title.className = 'feature-title';
+    title.textContent = item.title;
+    var meta = document.createElement('div');
+    meta.className = 'feature-meta';
+    meta.textContent = (item.author || 'The Verge') + ' · ' + timeAgo(item.pubDate);
+    body.appendChild(title);
+    body.appendChild(meta);
+    a.appendChild(body);
+    return a;
+  }
+
+  function buildItem(item, index){
+    var a = document.createElement('a');
+    a.className = 'item';
+    a.style.setProperty('--i', index);
+    a.href = item.link;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    var img = imageFor(item);
+    if (img){
+      thumb.style.backgroundImage = 'url(' + img + ')';
+    } else {
+      thumb.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="#fff" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="#fff"/><path d="M4 16l5-4 4 3 3-2 4 3" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+    }
+
+    var body = document.createElement('div');
+    body.className = 'item-body';
+    var title = document.createElement('p');
+    title.className = 'item-title';
+    title.textContent = item.title;
+    var meta = document.createElement('div');
+    meta.className = 'item-meta';
+    var src = document.createElement('span');
+    src.className = 'src';
+    src.textContent = (item.author || 'The Verge') + ' · ' + timeAgo(item.pubDate);
+    meta.appendChild(src);
+    body.appendChild(title);
+    body.appendChild(meta);
+
+    a.appendChild(thumb);
+    a.appendChild(body);
+    return a;
+  }
+
   function render(items){
     list.innerHTML = '';
-    items.slice(0, 8).forEach(function(item){
-      var a = document.createElement('a');
-      a.className = 'item';
-      a.href = item.link;
-      a.target = '_blank';
-      a.rel = 'noopener';
-      var thumb = document.createElement('div');
-      thumb.className = 'thumb';
-      var img = item.thumbnail || (item.enclosure && item.enclosure.link) || extractImage(item) || '';
-      if (img){
-        thumb.style.backgroundImage = 'url(' + img + ')';
-      } else {
-        thumb.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="#fff" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="#fff"/><path d="M4 16l5-4 4 3 3-2 4 3" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
-      }
-
-      var body = document.createElement('div');
-      body.className = 'item-body';
-      var title = document.createElement('p');
-      title.className = 'item-title';
-      title.textContent = item.title;
-      var meta = document.createElement('div');
-      meta.className = 'item-meta';
-      var src = document.createElement('span');
-      src.className = 'src';
-      src.textContent = (item.author || 'The Verge') + ' · ' + timeAgo(item.pubDate);
-      meta.appendChild(src);
-      body.appendChild(title);
-      body.appendChild(meta);
-
-      a.appendChild(thumb);
-      a.appendChild(body);
-      list.appendChild(a);
+    if (!items.length) return;
+    list.appendChild(buildFeature(items[0]));
+    var sub = document.createElement('p');
+    sub.className = 'sub-label';
+    sub.textContent = 'More AI news';
+    list.appendChild(sub);
+    items.slice(1, 8).forEach(function(item, i){
+      list.appendChild(buildItem(item, i));
     });
   }
 

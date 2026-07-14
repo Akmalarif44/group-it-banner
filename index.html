@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Group IT — energy grid banner</title>
+<style>
+  :root{
+    --void:#07090b;
+    --void-2:#0d1219;
+    --grid:96,112,128;
+    --ink:#eef2f5;
+    --ink-soft:#7c8896;
+    --amber:#ff5f6d;
+    --cyan:#e2263f;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:var(--void);
+    font-family:-apple-system,"Segoe UI",system-ui,sans-serif;
+  }
+  .wrap{
+    max-width:1080px;
+    margin:0 auto;
+    padding:28px 20px 40px;
+  }
+  .label{
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    margin:0 0 12px;
+  }
+
+  .stage{
+    position:relative;
+    width:100%;
+    height:clamp(320px,42vw,460px);
+    border-radius:16px;
+    overflow:hidden;
+    background:var(--void);
+    isolation:isolate;
+  }
+  .stage canvas{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    display:block;
+  }
+  .vignette{
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:radial-gradient(ellipse at center, transparent 40%, rgba(7,9,11,0.55) 100%);
+  }
+
+  .overlay{
+    position:absolute; inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:10px;
+    pointer-events:none;
+  }
+  .tag{
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-size:11.5px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .wordmark{
+    margin:0;
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-weight:700;
+    font-size:clamp(38px,7vw,74px);
+    letter-spacing:0.01em;
+    color:var(--ink);
+    text-shadow:0 0 24px rgba(238,242,245,0.25);
+  }
+  .wordmark .it{
+    color:var(--cyan);
+    text-shadow:
+      0 0 6px rgba(226,38,63,0.9),
+      0 0 22px rgba(226,38,63,0.6),
+      0 0 46px rgba(226,38,63,0.35);
+    animation:flicker 6.4s infinite;
+  }
+  @keyframes flicker{
+    0%,3%,5%,7%,100%{ opacity:1; }
+    4%{ opacity:0.35; }
+    6%{ opacity:0.75; }
+    38%{ opacity:1; }
+    39%{ opacity:0.5; }
+    40%{ opacity:1; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .wordmark .it{ animation:none; }
+  }
+  .sub{
+    margin:2px 0 0;
+    font-size:clamp(13px,1.6vw,15px);
+    color:var(--ink-soft);
+    max-width:36ch;
+  }
+
+  .credit{
+    position:absolute;
+    right:16px; bottom:14px;
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-size:10.5px;
+    color:rgba(124,136,150,0.75);
+    letter-spacing:0.02em;
+    pointer-events:none;
+  }
+
+  .note{
+    margin-top:18px;
+    font-size:13px;
+    color:#8993a1;
+    max-width:64ch;
+  }
+  .note code{
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-size:12px;
+    background:#151b23;
+    color:#cfd8e0;
+    padding:2px 6px;
+    border-radius:5px;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <p class="label">Group IT · SharePoint hero embed</p>
+
+  <div class="stage" id="stage">
+    <canvas id="grid"></canvas>
+    <div class="vignette"></div>
+    <div class="overlay">
+      <p class="tag">Petra Energy Berhad</p>
+      <h1 class="wordmark">GROUP <span class="it">IT</span></h1>
+      <p class="sub">Where the energy grid meets the network.</p>
+    </div>
+    <div class="credit">◆ served from GitHub Pages</div>
+  </div>
+
+  <p class="note">Move your cursor over the banner — the grid brightens along your row and column, like current finding a path. This is a single self-contained <code>&lt;canvas&gt;</code> animation: host the file on GitHub Pages, then drop its URL into SharePoint's Embed web part.</p>
+</div>
+
+<script>
+(function(){
+  var canvas = document.getElementById('grid');
+  var ctx = canvas.getContext('2d');
+  var stage = document.getElementById('stage');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
+  var SPACING = 44;
+  var mouse = { x: -9999, y: -9999 };
+  var pulses = [];
+  var rings = [];
+  var frame = 0;
+
+  function resize(){
+    var rect = stage.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+
+  function makePulse(){
+    var axis = Math.random() < 0.5 ? 'v' : 'h';
+    var color = Math.random() < 0.55 ? 'amber' : 'cyan';
+    if (axis === 'v'){
+      var cols = Math.round(W / SPACING);
+      var x = Math.round(Math.random() * cols) * SPACING;
+      return { axis: axis, cross: x, pos: -Math.random() * H, speed: 55 + Math.random() * 70, color: color };
+    } else {
+      var rows = Math.round(H / SPACING);
+      var y = Math.round(Math.random() * rows) * SPACING;
+      return { axis: axis, cross: y, pos: -Math.random() * W, speed: 55 + Math.random() * 70, color: color };
+    }
+  }
+
+  function initPulses(){
+    pulses = [];
+    var count = reduced ? 14 : 30;
+    for (var i = 0; i < count; i++){
+      var p = makePulse();
+      p.pos = Math.random() * (p.axis === 'v' ? H : W);
+      pulses.push(p);
+    }
+  }
+
+  function colorRGB(name){
+    return name === 'amber' ? '255,95,109' : '226,38,63';
+  }
+
+  function draw(dt){
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#07090b';
+    ctx.fillRect(0, 0, W, H);
+
+    var cols = Math.round(W / SPACING);
+    var rows = Math.round(H / SPACING);
+
+    ctx.lineWidth = 1;
+    for (var i = 0; i <= cols; i++){
+      var x = i * SPACING;
+      var dist = Math.abs(x - mouse.x);
+      var glow = Math.max(0, 1 - dist / 160);
+      ctx.strokeStyle = 'rgba(96,112,128,' + (0.08 + glow * 0.35) + ')';
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, H);
+      ctx.stroke();
+    }
+    for (var j = 0; j <= rows; j++){
+      var y = j * SPACING;
+      var distY = Math.abs(y - mouse.y);
+      var glowY = Math.max(0, 1 - distY / 160);
+      ctx.strokeStyle = 'rgba(96,112,128,' + (0.08 + glowY * 0.35) + ')';
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(W, y);
+      ctx.stroke();
+    }
+
+    for (var k = 0; k < pulses.length; k++){
+      var p = pulses[k];
+      p.pos += p.speed * dt;
+      var limit = p.axis === 'v' ? H : W;
+      if (p.pos > limit + 20){
+        var np = makePulse();
+        pulses[k] = np;
+        continue;
+      }
+      var px = p.axis === 'v' ? p.cross : p.pos;
+      var py = p.axis === 'v' ? p.pos : p.cross;
+      var d = Math.hypot(px - mouse.x, py - mouse.y);
+      var boost = Math.max(0, 1 - d / 140);
+      var rgb = colorRGB(p.color);
+      var r = 2.4 + boost * 2.2;
+
+      var grad = ctx.createRadialGradient(px, py, 0, px, py, r * 5);
+      grad.addColorStop(0, 'rgba(' + rgb + ',' + (0.9) + ')');
+      grad.addColorStop(1, 'rgba(' + rgb + ',0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(px, py, r * 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(' + rgb + ',1)';
+      ctx.beginPath();
+      ctx.arc(px, py, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    var hubX = W / 2, hubY = H / 2;
+    var hubGrad = ctx.createRadialGradient(hubX, hubY, 0, hubX, hubY, Math.max(W, H) * 0.32);
+    hubGrad.addColorStop(0, 'rgba(226,38,63,0.12)');
+    hubGrad.addColorStop(1, 'rgba(226,38,63,0)');
+    ctx.fillStyle = hubGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    for (var m = rings.length - 1; m >= 0; m--){
+      var ring = rings[m];
+      ring.radius += 42 * dt;
+      ring.alpha -= 0.35 * dt;
+      if (ring.alpha <= 0){ rings.splice(m, 1); continue; }
+      ctx.strokeStyle = 'rgba(226,38,63,' + ring.alpha.toFixed(3) + ')';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(hubX, hubY, ring.radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+
+  var last = 0;
+  function loop(ts){
+    if (!last) last = ts;
+    var dt = Math.min((ts - last) / 1000, 0.05);
+    last = ts;
+    frame++;
+    if (frame % 130 === 0){
+      rings.push({ radius: 18, alpha: 0.5 });
+    }
+    draw(dt);
+    requestAnimationFrame(loop);
+  }
+
+  stage.addEventListener('pointermove', function(e){
+    var rect = stage.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+  stage.addEventListener('pointerleave', function(){
+    mouse.x = -9999; mouse.y = -9999;
+  });
+
+  window.addEventListener('resize', function(){
+    resize();
+    initPulses();
+  });
+
+  resize();
+  initPulses();
+
+  if (reduced){
+    rings.push({ radius: 40, alpha: 0.35 });
+    draw(0);
+  } else {
+    requestAnimationFrame(loop);
+  }
+})();
+</script>
+</body>
+</html>

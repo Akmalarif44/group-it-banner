@@ -169,7 +169,7 @@
 <script>
 (function(){
   var FEED = 'https://api.rss2json.com/v1/api.json?rss_url=' +
-    encodeURIComponent('https://www.artificialintelligence-news.com/feed/');
+    encodeURIComponent('https://www.theverge.com/rss/ai-artificial-intelligence/index.xml');
   var list = document.getElementById('list');
   var refreshBtn = document.getElementById('refreshBtn');
   var timer = null;
@@ -215,7 +215,7 @@
       meta.className = 'item-meta';
       var src = document.createElement('span');
       src.className = 'src';
-      src.textContent = (item.author || 'AI News') + ' · ' + timeAgo(item.pubDate);
+      src.textContent = (item.author || 'The Verge') + ' · ' + timeAgo(item.pubDate);
       meta.appendChild(src);
       body.appendChild(title);
       body.appendChild(meta);

@@ -80,7 +80,9 @@
     padding-right:2px;
   }
   a.item{
-    display:block;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
     padding:9px 11px;
     border-radius:8px;
     background:var(--panel);
@@ -93,11 +95,25 @@
     border-color:var(--red);
     background:#fdeef0;
   }
+  .thumb{
+    flex-shrink:0;
+    width:56px; height:56px;
+    border-radius:7px;
+    background:var(--red) center/cover no-repeat;
+    display:grid;
+    place-items:center;
+  }
+  .thumb svg{ width:20px; height:20px; opacity:0.9; }
+  .item-body{ min-width:0; flex:1; }
   .item-title{
     font-size:12px;
     font-weight:600;
     line-height:1.35;
     margin:0 0 4px;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
   }
   .item-meta{
     font-size:10px;
@@ -153,7 +169,7 @@
 <script>
 (function(){
   var FEED = 'https://api.rss2json.com/v1/api.json?rss_url=' +
-    encodeURIComponent('https://news.google.com/rss/search?q=artificial+intelligence&hl=en-US&gl=US&ceid=US:en');
+    encodeURIComponent('https://www.artificialintelligence-news.com/feed/');
   var list = document.getElementById('list');
   var refreshBtn = document.getElementById('refreshBtn');
   var timer = null;
@@ -175,6 +191,17 @@
       a.href = item.link;
       a.target = '_blank';
       a.rel = 'noopener';
+      var thumb = document.createElement('div');
+      thumb.className = 'thumb';
+      var img = item.thumbnail || (item.enclosure && item.enclosure.link) || '';
+      if (img){
+        thumb.style.backgroundImage = 'url(' + img + ')';
+      } else {
+        thumb.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z" stroke="#fff" stroke-width="1.6"/><circle cx="9" cy="10" r="1.4" fill="#fff"/><path d="M4 16l5-4 4 3 3-2 4 3" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+      }
+
+      var body = document.createElement('div');
+      body.className = 'item-body';
       var title = document.createElement('p');
       title.className = 'item-title';
       title.textContent = item.title;
@@ -182,10 +209,13 @@
       meta.className = 'item-meta';
       var src = document.createElement('span');
       src.className = 'src';
-      src.textContent = (item.author || 'Google News') + ' · ' + timeAgo(item.pubDate);
+      src.textContent = (item.author || 'AI News') + ' · ' + timeAgo(item.pubDate);
       meta.appendChild(src);
-      a.appendChild(title);
-      a.appendChild(meta);
+      body.appendChild(title);
+      body.appendChild(meta);
+
+      a.appendChild(thumb);
+      a.appendChild(body);
       list.appendChild(a);
     });
   }

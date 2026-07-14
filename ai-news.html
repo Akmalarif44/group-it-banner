@@ -183,6 +183,12 @@
     return Math.floor(hrs / 24) + 'd ago';
   }
 
+  function extractImage(item){
+    var html = item.content || item.description || '';
+    var match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+    return match ? match[1] : '';
+  }
+
   function render(items){
     list.innerHTML = '';
     items.slice(0, 8).forEach(function(item){
@@ -193,7 +199,7 @@
       a.rel = 'noopener';
       var thumb = document.createElement('div');
       thumb.className = 'thumb';
-      var img = item.thumbnail || (item.enclosure && item.enclosure.link) || '';
+      var img = item.thumbnail || (item.enclosure && item.enclosure.link) || extractImage(item) || '';
       if (img){
         thumb.style.backgroundImage = 'url(' + img + ')';
       } else {

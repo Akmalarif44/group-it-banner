@@ -77,34 +77,34 @@
     gap:10px;
     margin-bottom:12px;
   }
-  .card-icon{
+  .card-photo{
     position:relative;
-    width:64px; height:64px;
-    border-radius:20px;
-    background:rgba(0,0,0,0.22);
-    display:grid;
-    place-items:center;
+    width:100%;
+    height:118px;
+    border-radius:14px;
+    background:rgba(0,0,0,0.3) center/cover no-repeat;
     flex-shrink:0;
     overflow:hidden;
     box-shadow:0 0 0 1px rgba(255,255,255,0.18);
   }
-  .card-icon::before{
+  .card-photo::after{
     content:'';
     position:absolute;
-    width:80px; height:80px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.08);
-    top:-20px; right:-24px;
+    inset:0;
+    background:linear-gradient(to top, rgba(0,0,0,0.45), transparent 55%);
   }
-  .card-icon::after{
-    content:'';
+  .card-badge{
     position:absolute;
-    width:34px; height:34px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.07);
-    bottom:-12px; left:-10px;
+    left:9px; bottom:9px;
+    width:32px; height:32px;
+    border-radius:9px;
+    background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(2px);
+    display:grid;
+    place-items:center;
+    z-index:1;
   }
-  .card-icon svg{ width:30px; height:30px; overflow:visible; position:relative; z-index:1; }
+  .card-badge svg{ width:17px; height:17px; overflow:visible; }
 
   .flap{
     transform-box:fill-box;
@@ -283,11 +283,23 @@
 
 <script>
 (function(){
+  var PHOTOS = {
+    mail: 'https://images.unsplash.com/photo-1592890288564-76628a30a657?auto=format&fit=crop&w=400&h=280&q=75',
+    signal: 'https://images.unsplash.com/photo-1555998322-9e293b1342da?auto=format&fit=crop&w=400&h=280&q=75',
+    lock: 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=400&h=280&q=75',
+    printer: 'https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=400&h=280&q=75',
+    wifi: 'https://images.unsplash.com/photo-1516044734145-07ca8eef8731?auto=format&fit=crop&w=400&h=280&q=75',
+    drive: 'https://images.unsplash.com/photo-1762163516269-3c143e04175c?auto=format&fit=crop&w=400&h=280&q=75',
+    refresh: 'https://images.unsplash.com/photo-1456406644174-8ddd4cd52a06?auto=format&fit=crop&w=400&h=280&q=75',
+    download: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=400&h=280&q=75'
+  };
+
   var ICONS = {
     mail: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#fff" stroke-width="1.8"/><path class="flap" d="M3.5 6.5L12 13l8.5-6.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     signal: '<svg viewBox="0 0 24 24" fill="none"><path class="ring3" d="M3 9a13 13 0 0 1 18 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path class="ring2" d="M6 12.5a8.5 8.5 0 0 1 12 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path class="ring1" d="M9 16a4 4 0 0 1 6 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="19" r="1.3" fill="#fff"/></svg>',
     lock: '<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="9" rx="1.5" stroke="#fff" stroke-width="1.8"/><path class="shackle" d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="1.8"/></svg>',
     printer: '<svg viewBox="0 0 24 24" fill="none"><path class="paper" d="M7 14h10v7H7z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M6 9V4h12v5M6 18h12" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><rect x="4" y="9" width="16" height="7" rx="1.2" stroke="#fff" stroke-width="1.8"/></svg>',
+    wifi: '<svg viewBox="0 0 24 24" fill="none"><path class="ring3" d="M3 9a13 13 0 0 1 18 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path class="ring2" d="M6 12.5a8.5 8.5 0 0 1 12 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path class="ring1" d="M9 16a4 4 0 0 1 6 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="19" r="1.3" fill="#fff"/></svg>',
     drive: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7a2 2 0 0 1 2-2h5l2 2h5a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path class="slide" d="M9 13h6M13 10.5L15.5 13 13 15.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     refresh: '<svg viewBox="0 0 24 24" fill="none"><path class="spin" d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     download: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path class="paper" d="M12 3v11M7.5 10.5L12 15l4.5-4.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
@@ -319,7 +331,7 @@
       help: 'Printer not listed?', helpLink: 'Contact IT Helpdesk →'
     },
     {
-      icon: 'signal',
+      icon: 'wifi',
       title: 'Connect to office Wi-Fi',
       steps: ['Open Wi-Fi settings and select the office network.', 'Enter your network username and password when prompted.', 'Accept the certificate if asked.', 'Confirm you can reach the intranet.'],
       help: 'Not seeing the network?', helpLink: 'Contact IT Helpdesk →'
@@ -364,7 +376,12 @@
     }).join('');
     card.innerHTML =
       (i === 0 ? '<span class="today-tag">Today\'s tip</span>' : '') +
-      '<div class="card-head"><div class="card-icon">' + ICONS[tip.icon] + '</div><p class="card-title">' + tip.title + '</p></div>' +
+      '<div class="card-head">' +
+        '<div class="card-photo" style="background-image:url(\'' + PHOTOS[tip.icon] + '\')">' +
+          '<div class="card-badge">' + ICONS[tip.icon] + '</div>' +
+        '</div>' +
+        '<p class="card-title">' + tip.title + '</p>' +
+      '</div>' +
       '<ol class="steps">' + stepsHtml + '</ol>' +
       '<p class="steps-hint">Tap a step to check it off</p>' +
       '<p class="card-help">' + tip.help + ' <a href="#" target="_blank" rel="noopener">' + tip.helpLink + '</a></p>';

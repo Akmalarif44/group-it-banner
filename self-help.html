@@ -8,14 +8,10 @@
   :root{
     --paper:#ffffff;
     --ink:#241a1c;
-    --ink-soft:#8a7477;
     --red:#7a1220;
     --red-bright:#9e1b2e;
     --line:#e3d7d9;
     --panel:#fbf5f6;
-    --weak:#c0392b;
-    --fair:#b8863a;
-    --strong:#1f8a4c;
   }
   *{ box-sizing:border-box; }
   html,body{ overflow:hidden; }
@@ -25,12 +21,7 @@
     color:var(--ink);
     font-family:-apple-system,"Segoe UI",system-ui,sans-serif;
   }
-  .page{
-    padding:18px;
-    display:flex;
-    flex-direction:column;
-    gap:22px;
-  }
+  .page{ padding:18px; }
   .label{
     font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
     font-size:11px;
@@ -41,24 +32,44 @@
     margin:0 0 10px;
   }
 
-  /* ---- self-help carousel ---- */
   .carousel{
     position:relative;
     touch-action:pan-y;
   }
   .card{ user-select:none; }
   .card{
+    position:relative;
     display:none;
     flex-direction:column;
     align-items:center;
     text-align:center;
-    background:var(--panel);
-    border:1px solid var(--line);
+    background:linear-gradient(155deg, var(--red-bright), var(--red) 60%);
+    border:1px solid #63101c;
     border-radius:12px;
     padding:20px 16px 16px;
     min-height:168px;
+    overflow:hidden;
+    color:#fff;
   }
   .card.active{ display:flex; }
+  .card::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.07) 0px, rgba(255,255,255,0.07) 1px, transparent 1px, transparent 26px);
+    background-size:200% 200%;
+    animation:grid-drift 14s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes grid-drift{
+    0%{ background-position:0% 0%; }
+    100%{ background-position:100% 100%; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .card::before{ animation:none; }
+  }
+  .card > *{ position:relative; z-index:1; }
   .card-head{
     display:flex;
     flex-direction:column;
@@ -70,11 +81,12 @@
     position:relative;
     width:64px; height:64px;
     border-radius:20px;
-    background:linear-gradient(150deg, var(--red-bright), var(--red));
+    background:rgba(0,0,0,0.22);
     display:grid;
     place-items:center;
     flex-shrink:0;
     overflow:hidden;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.18);
   }
   .card-icon::before{
     content:'';
@@ -144,9 +156,9 @@
     font-weight:700;
     letter-spacing:0.06em;
     text-transform:uppercase;
-    color:var(--red);
-    background:#fdeef0;
-    border:1px solid #f3d3d8;
+    color:#fff;
+    background:rgba(255,255,255,0.16);
+    border:1px solid rgba(255,255,255,0.25);
     padding:2px 7px;
     border-radius:5px;
     margin-bottom:8px;
@@ -155,6 +167,7 @@
     font-size:13.5px;
     font-weight:700;
     margin:0;
+    color:#fff;
   }
   .card ol.steps{
     list-style:none;
@@ -162,7 +175,7 @@
     padding:0;
     font-size:12px;
     line-height:1.4;
-    color:var(--ink);
+    color:#fff;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -181,14 +194,14 @@
     max-width:280px;
     width:100%;
   }
-  .card ol.steps li:hover{ background:rgba(122,18,32,0.07); }
+  .card ol.steps li:hover{ background:rgba(255,255,255,0.1); }
   .step-badge{
     flex-shrink:0;
     width:16px; height:16px;
     margin-top:1px;
     border-radius:50%;
-    border:1.5px solid var(--red);
-    color:var(--red);
+    border:1.5px solid rgba(255,255,255,0.7);
+    color:#fff;
     font-size:9px;
     font-weight:700;
     display:grid;
@@ -196,26 +209,26 @@
     transition:background .15s, border-color .15s, color .15s;
   }
   .card ol.steps li.done .step-badge{
-    background:var(--strong);
-    border-color:var(--strong);
-    color:#fff;
+    background:#fff;
+    border-color:#fff;
+    color:var(--red);
   }
   .step-text{ flex:1; }
   .card ol.steps li.done .step-text{
     text-decoration:line-through;
-    opacity:0.55;
+    opacity:0.6;
   }
   .steps-hint{
     font-size:10px;
-    color:var(--ink-soft);
+    color:rgba(255,255,255,0.7);
     margin:-4px 0 8px;
   }
   .card-help{
     font-size:11px;
-    color:var(--ink-soft);
+    color:rgba(255,255,255,0.8);
   }
-  .card-help a{ color:var(--red); font-weight:600; text-decoration:none; }
-  .card-help a:hover{ text-decoration:underline; }
+  .card-help a{ color:#fff; font-weight:700; text-decoration:underline; }
+  .card-help a:hover{ opacity:0.85; }
 
   .nav{
     display:flex;
@@ -246,232 +259,26 @@
     transition:background .2s, width .2s;
   }
   .dots button.active{ background:var(--red); width:16px; border-radius:3px; }
-
-  /* ---- password checker ---- */
-  .pw-box{
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:16px;
-  }
-  .pw-field{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    background:#fff;
-    border:1px solid var(--line);
-    border-radius:8px;
-    padding:8px 10px;
-  }
-  .pw-field input{
-    flex:1;
-    border:0;
-    outline:0;
-    font-size:13px;
-    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
-    color:var(--ink);
-    background:transparent;
-  }
-  .pw-toggle{
-    position:relative;
-    border:0;
-    background:none;
-    cursor:pointer;
-    color:var(--ink-soft);
-    display:grid;
-    place-items:center;
-    padding:2px;
-    transition:color .15s;
-  }
-  .pw-toggle:hover{ color:var(--red); }
-  .pw-toggle svg{ width:16px; height:16px; }
-
-  .copy-tip{
-    position:absolute;
-    bottom:calc(100% + 6px);
-    left:50%;
-    transform:translateX(-50%) translateY(3px);
-    background:var(--ink);
-    color:#fff;
-    font-size:10px;
-    font-weight:600;
-    padding:3px 7px;
-    border-radius:5px;
-    white-space:nowrap;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity .15s, transform .15s;
-  }
-  .copy-tip.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-
-  .pw-actions{
-    display:flex;
-    gap:8px;
-    margin-top:10px;
-  }
-  .pw-gen{
-    flex:1;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:6px;
-    padding:8px 10px;
-    border-radius:8px;
-    border:1px solid var(--red);
-    background:#fff;
-    color:var(--red);
-    font-size:11.5px;
-    font-weight:700;
-    cursor:pointer;
-    transition:background .15s, color .15s;
-  }
-  .pw-gen:hover{ background:var(--red); color:#fff; }
-  .pw-gen svg{ width:13px; height:13px; }
-
-  .crack-time{
-    font-size:11px;
-    color:var(--ink-soft);
-    margin:2px 0 10px;
-  }
-  .crack-time b{ color:var(--ink); }
-
-  .shield-row{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    margin:14px 0 12px;
-  }
-  .shield-wrap{
-    position:relative;
-    width:52px; height:60px;
-    flex-shrink:0;
-  }
-  .shield-wrap svg{ position:absolute; inset:0; width:100%; height:100%; }
-  .shield-fill{
-    clip-path:inset(100% 0 0 0);
-    transition:clip-path .35s ease;
-  }
-  .shield-fill path{ transition:fill .35s ease; }
-  .shield-lock{
-    width:20px; height:20px;
-    position:absolute;
-    top:50%; left:50%;
-    transform:translate(-50%,-56%);
-  }
-  .shield-lock .lock-closed{ display:none; }
-  .shield-info{ min-width:0; }
-  .meter-text{
-    font-size:13.5px;
-    font-weight:700;
-    margin:0 0 2px;
-  }
-  .meter-hint{
-    font-size:11px;
-    color:var(--ink-soft);
-    margin:0;
-  }
-
-  .checks{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:6px 10px;
-    margin-bottom:10px;
-  }
-  .check{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    font-size:11px;
-    color:var(--ink-soft);
-  }
-  .check svg{ width:13px; height:13px; flex-shrink:0; }
-  .check.met{ color:var(--ink); }
-  .check .off{ display:inline; }
-  .check .on{ display:none; }
-  .check.met .off{ display:none; }
-  .check.met .on{ display:inline; }
-
-  .pw-note{
-    font-size:10.5px;
-    color:var(--ink-soft);
-    display:flex;
-    align-items:center;
-    gap:5px;
-  }
-  .pw-note svg{ width:12px; height:12px; flex-shrink:0; }
 </style>
 </head>
 <body>
 
 <div class="page">
+  <p class="label">IT Self-Help</p>
+  <div class="carousel" id="carousel">
 
-  <div>
-    <p class="label">IT Self-Help</p>
-    <div class="carousel" id="carousel">
+    <div id="cardMount"></div>
 
-      <div id="cardMount"></div>
-
-      <div class="nav">
-        <button type="button" id="prevBtn" aria-label="Previous tip">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <div class="dots" id="dots"></div>
-        <button type="button" id="nextBtn" aria-label="Next tip">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
+    <div class="nav">
+      <button type="button" id="prevBtn" aria-label="Previous tip">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="dots" id="dots"></div>
+      <button type="button" id="nextBtn" aria-label="Next tip">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
   </div>
-
-  <div>
-    <p class="label">Password Strength Check</p>
-    <div class="pw-box">
-      <div class="pw-field">
-        <input id="pwInput" type="password" placeholder="Type a password to test it…" autocomplete="off" spellcheck="false">
-        <button class="pw-toggle" id="pwToggle" type="button" aria-label="Show password">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>
-        </button>
-        <button class="pw-toggle" id="copyBtn" type="button" aria-label="Copy password">
-          <span class="copy-tip" id="copyTip">Copied!</span>
-          <svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a1 1 0 0 1 1-1h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-
-      <div class="pw-actions">
-        <button class="pw-gen" id="genBtn" type="button">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          Generate a strong password
-        </button>
-      </div>
-
-      <p class="crack-time" id="crackTime"></p>
-
-      <div class="shield-row">
-        <div class="shield-wrap">
-          <svg class="shield-outline" viewBox="0 0 40 46"><path d="M20 2 L34 8 V21 C34 31 28 39 20 44 C12 39 6 31 6 21 V8 Z" stroke="var(--line)" stroke-width="2.5" fill="none"/></svg>
-          <svg class="shield-fill" id="shieldFill" viewBox="0 0 40 46"><path d="M20 2 L34 8 V21 C34 31 28 39 20 44 C12 39 6 31 6 21 V8 Z" fill="var(--weak)"/></svg>
-          <svg class="shield-lock" viewBox="0 0 24 24" fill="none">
-            <g class="lock-open"><path d="M8 10V7a4 4 0 1 1 8 0" stroke="#fff" stroke-width="2" stroke-linecap="round"/><rect x="5" y="10" width="14" height="9" rx="2" stroke="#fff" stroke-width="2"/></g>
-            <g class="lock-closed"><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="2" stroke-linecap="round"/><rect x="5" y="10" width="14" height="9" rx="2" fill="#fff"/></g>
-          </svg>
-        </div>
-        <div class="shield-info">
-          <p class="meter-text" id="meterText">Enter a password</p>
-          <p class="meter-hint" id="meterHint">The shield fills in as it gets stronger</p>
-        </div>
-      </div>
-
-      <div class="checks" id="checks">
-        <div class="check" data-rule="len"><svg class="off" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg><svg class="on" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#1f8a4c"/><path d="M8 12l2.5 2.5L16 9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>12+ characters</div>
-        <div class="check" data-rule="upper"><svg class="off" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg><svg class="on" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#1f8a4c"/><path d="M8 12l2.5 2.5L16 9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Upper &amp; lowercase</div>
-        <div class="check" data-rule="num"><svg class="off" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg><svg class="on" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#1f8a4c"/><path d="M8 12l2.5 2.5L16 9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>A number</div>
-        <div class="check" data-rule="sym"><svg class="off" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/></svg><svg class="on" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#1f8a4c"/><path d="M8 12l2.5 2.5L16 9" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>A symbol</div>
-      </div>
-
-      <p class="pw-note"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.6"/></svg>Checked entirely in your browser — nothing you type here is sent anywhere.</p>
-    </div>
-  </div>
-
 </div>
 
 <script>
@@ -502,7 +309,7 @@
     {
       icon: 'lock',
       title: 'Reset your password',
-      steps: ['Go to the company password portal.', 'Verify your identity via MFA.', 'Choose a new password (check its strength below ↓).', 'Update it on your phone/laptop mail apps too.'],
+      steps: ['Go to the company password portal.', 'Verify your identity via MFA.', 'Choose a new password (check its strength on the Password Strength Check tool).', 'Update it on your phone/laptop mail apps too.'],
       help: 'Locked out entirely?', helpLink: 'Contact IT Helpdesk →'
     },
     {
@@ -600,129 +407,6 @@
     if (Math.abs(dx) > 40) show(current + (dx < 0 ? 1 : -1));
     dragStartX = null;
   });
-
-  var input = document.getElementById('pwInput');
-  var toggle = document.getElementById('pwToggle');
-  var shieldFill = document.getElementById('shieldFill');
-  var shieldFillPath = shieldFill.querySelector('path');
-  var lockOpen = document.querySelector('.lock-open');
-  var lockClosed = document.querySelector('.lock-closed');
-  var meterText = document.getElementById('meterText');
-  var meterHint = document.getElementById('meterHint');
-  var checkEls = {
-    len: document.querySelector('[data-rule="len"]'),
-    upper: document.querySelector('[data-rule="upper"]'),
-    num: document.querySelector('[data-rule="num"]'),
-    sym: document.querySelector('[data-rule="sym"]')
-  };
-
-  toggle.addEventListener('click', function(){
-    input.type = input.type === 'password' ? 'text' : 'password';
-  });
-
-  var copyBtn = document.getElementById('copyBtn');
-  var copyTip = document.getElementById('copyTip');
-  copyBtn.addEventListener('click', function(){
-    if (!input.value) return;
-    var done = function(){
-      copyTip.classList.add('show');
-      setTimeout(function(){ copyTip.classList.remove('show'); }, 1200);
-    };
-    if (navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(input.value).then(done).catch(done);
-    } else {
-      input.select();
-      document.execCommand('copy');
-      done();
-    }
-  });
-
-  var genBtn = document.getElementById('genBtn');
-  genBtn.addEventListener('click', function(){
-    var charset = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%^&*-_+=';
-    var bytes = new Uint32Array(18);
-    crypto.getRandomValues(bytes);
-    var pw = '';
-    for (var i = 0; i < bytes.length; i++){
-      pw += charset[bytes[i] % charset.length];
-    }
-    input.type = 'text';
-    input.value = pw;
-    input.dispatchEvent(new Event('input'));
-  });
-
-  function crackTimeLabel(pw){
-    var poolSize = 0;
-    if (/[a-z]/.test(pw)) poolSize += 26;
-    if (/[A-Z]/.test(pw)) poolSize += 26;
-    if (/[0-9]/.test(pw)) poolSize += 10;
-    if (/[^a-zA-Z0-9]/.test(pw)) poolSize += 32;
-    if (!poolSize) return '';
-
-    var entropyBits = pw.length * Math.log2(poolSize);
-    var guesses = Math.pow(2, entropyBits) / 2;
-    var seconds = guesses / 1e10; // ~10B guesses/sec, a typical fast offline attack
-
-    var label;
-    if (seconds < 1) label = 'instantly';
-    else if (seconds < 60) label = Math.round(seconds) + ' seconds';
-    else if (seconds < 3600) label = Math.round(seconds / 60) + ' minutes';
-    else if (seconds < 86400) label = Math.round(seconds / 3600) + ' hours';
-    else if (seconds < 31536000) label = Math.round(seconds / 86400) + ' days';
-    else if (seconds < 3153600000) label = Math.round(seconds / 31536000) + ' years';
-    else label = 'centuries';
-
-    return label;
-  }
-
-  var commonWeak = ['password','12345678','123456789','qwerty123','letmein','iloveyou','admin123','welcome1'];
-
-  function score(pw){
-    if (!pw) return { pct: 0, label: 'Enter a password', color: 'var(--line)', hint: 'The shield fills in as it gets stronger', crack: '' };
-
-    var hasLower = /[a-z]/.test(pw);
-    var hasUpper = /[A-Z]/.test(pw);
-    var hasNum = /[0-9]/.test(pw);
-    var hasSym = /[^a-zA-Z0-9]/.test(pw);
-    var lenOk = pw.length >= 12;
-
-    checkEls.len.classList.toggle('met', lenOk);
-    checkEls.upper.classList.toggle('met', hasLower && hasUpper);
-    checkEls.num.classList.toggle('met', hasNum);
-    checkEls.sym.classList.toggle('met', hasSym);
-
-    var variety = [hasLower, hasUpper, hasNum, hasSym].filter(Boolean).length;
-    var pct = Math.min(100, Math.round((pw.length / 16) * 55) + variety * 11);
-
-    var isSequential = /(0123|1234|2345|3456|4567|5678|6789|abcd|bcde|cdef)/i.test(pw);
-    var isRepeated = /(.)\1\1/.test(pw);
-    var isCommon = commonWeak.indexOf(pw.toLowerCase()) !== -1;
-    if (isSequential || isRepeated || isCommon) pct = Math.min(pct, 30);
-
-    var label, color, hint;
-    if (pct < 30){ label = 'Weak'; color = 'var(--weak)'; hint = 'Too predictable'; }
-    else if (pct < 55){ label = 'Fair'; color = 'var(--fair)'; hint = 'Getting there'; }
-    else if (pct < 80){ label = 'Strong'; color = 'var(--strong)'; hint = 'Good'; }
-    else { label = 'Very strong'; color = 'var(--strong)'; hint = 'Excellent'; }
-
-    return { pct: pct, label: label, color: color, hint: hint, crack: crackTimeLabel(pw) };
-  }
-
-  var crackTimeEl = document.getElementById('crackTime');
-
-  input.addEventListener('input', function(){
-    var r = score(input.value);
-    shieldFill.style.clipPath = 'inset(' + (100 - r.pct) + '% 0 0 0)';
-    shieldFillPath.style.fill = r.color;
-    meterText.textContent = r.label;
-    meterHint.textContent = r.hint;
-    var isStrong = r.pct >= 55;
-    lockOpen.style.display = isStrong ? 'none' : 'block';
-    lockClosed.style.display = isStrong ? 'block' : 'none';
-    crackTimeEl.innerHTML = r.crack ? 'Estimated time to crack: <b>' + r.crack + '</b>' : '';
-  });
-
-  score('');
 })();
 </script>
 </body>

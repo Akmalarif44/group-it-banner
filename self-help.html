@@ -309,8 +309,7 @@
     {
       icon: 'mail',
       title: 'Set up Outlook on your phone',
-      steps: ['Install "Outlook" from the App Store / Play Store.', 'Open it and tap <b>Add Account</b>.', 'Enter your work email, then your usual network password.', 'Approve the sign-in prompt if MFA is enabled.'],
-      help: 'Still stuck?', helpLink: 'Contact IT Helpdesk →'
+      steps: ['Install "Outlook" from the App Store / Play Store.', 'Open it and tap <b>Add Account</b>.', 'Enter your work email, then your usual network password.', 'Approve the sign-in prompt if MFA is enabled.']
     },
     {
       icon: 'signal',
@@ -321,38 +320,32 @@
     {
       icon: 'lock',
       title: 'Reset your password',
-      steps: ['Go to the company password portal.', 'Verify your identity via MFA.', 'Choose a new password (check its strength on the Password Strength Check tool).', 'Update it on your phone/laptop mail apps too.'],
-      help: 'Locked out entirely?', helpLink: 'Contact IT Helpdesk →'
+      steps: ['Go to the company password portal.', 'Verify your identity via MFA.', 'Choose a new password (check its strength on the Password Strength Check tool).', 'Update it on your phone/laptop mail apps too.']
     },
     {
       icon: 'printer',
       title: 'Set up a network printer',
-      steps: ['Open Settings → Printers &amp; Scanners.', 'Choose <b>Add Printer</b> and pick your office\'s shared printer.', 'Install the driver if prompted.', 'Print a test page to confirm it works.'],
-      help: 'Printer not listed?', helpLink: 'Contact IT Helpdesk →'
+      steps: ['Open Settings → Printers &amp; Scanners.', 'Choose <b>Add Printer</b> and pick your office\'s shared printer.', 'Install the driver if prompted.', 'Print a test page to confirm it works.']
     },
     {
       icon: 'wifi',
       title: 'Connect to office Wi-Fi',
-      steps: ['Open Wi-Fi settings and select the office network.', 'Enter your network username and password when prompted.', 'Accept the certificate if asked.', 'Confirm you can reach the intranet.'],
-      help: 'Not seeing the network?', helpLink: 'Contact IT Helpdesk →'
+      steps: ['Open Wi-Fi settings and select the office network.', 'Enter your network username and password when prompted.', 'Accept the certificate if asked.', 'Confirm you can reach the intranet.']
     },
     {
       icon: 'drive',
       title: 'Map a network drive',
-      steps: ['Open File Explorer and choose <b>Map network drive</b>.', 'Pick a drive letter, e.g. <b>Z:</b>.', 'Enter the shared folder path from your team.', 'Tick "Reconnect at sign-in" so it stays mapped.'],
-      help: 'Don\'t know your folder path?', helpLink: 'Contact IT Helpdesk →'
+      steps: ['Open File Explorer and choose <b>Map network drive</b>.', 'Pick a drive letter, e.g. <b>Z:</b>.', 'Enter the shared folder path from your team.', 'Tick "Reconnect at sign-in" so it stays mapped.']
     },
     {
       icon: 'refresh',
       title: 'Fix a slow computer',
-      steps: ['Restart the computer — this alone fixes most slowdowns.', 'Close browser tabs and apps you\'re not using.', 'Check for pending Windows updates.', 'Still slow after a restart? Log a ticket with what you tried.'],
-      help: 'Still running slow?', helpLink: 'Contact IT Helpdesk →'
+      steps: ['Restart the computer — this alone fixes most slowdowns.', 'Close browser tabs and apps you\'re not using.', 'Check for pending Windows updates.', 'Still slow after a restart? Log a ticket with what you tried.']
     },
     {
       icon: 'download',
       title: 'Request new software',
-      steps: ['Check the Software Center for pre-approved apps first.', 'Not listed? Submit a software request via GIT Forms.', 'Include the business reason — it speeds up approval.', 'IT will install it remotely once approved.'],
-      help: 'Need it urgently?', helpLink: 'Contact IT Helpdesk →'
+      steps: ['Check the Software Center for pre-approved apps first.', 'Not listed? Submit a software request via GIT Forms.', 'Include the business reason — it speeds up approval.', 'IT will install it remotely once approved.']
     }
   ];
 
@@ -384,7 +377,7 @@
       '</div>' +
       '<ol class="steps">' + stepsHtml + '</ol>' +
       '<p class="steps-hint">Tap a step to check it off</p>' +
-      '<p class="card-help">' + tip.help + ' <a href="#" target="_blank" rel="noopener">' + tip.helpLink + '</a></p>';
+      (tip.help ? '<p class="card-help">' + tip.help + ' <a href="#" target="_blank" rel="noopener">' + tip.helpLink + '</a></p>' : '');
 
     mount.appendChild(card);
 

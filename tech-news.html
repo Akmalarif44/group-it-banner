@@ -1,239 +1,495 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tech &amp; Infra News</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Group IT — Tech &amp; Infra news</title>
 <style>
   :root{
-    --petra-red: #B41F2E;
-    --navy: #0C1B26;
-    --ink: #1B1F23;
-    --steel: #5A6B78;
-    --line: #E9E0DE;
-    --panel: #FBF5F6;
-    --good: #1E7A4C;
+    --paper:#ffffff;
+    --ink:#241a1c;
+    --ink-soft:#8a7477;
+    --red:#7a1220;
+    --red-bright:#9e1b2e;
+    --line:#e3d7d9;
+    --panel:#fbf5f6;
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:transparent;}
-  body{font-family:'IBM Plex Sans', system-ui, sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased;}
-  a{color:inherit; text-decoration:none;}
-  .wrap{max-width:640px; margin:0 auto;}
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; overflow:hidden; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,"Segoe UI",system-ui,sans-serif;
+  }
+  .panel{
+    height:100%;
+    padding:16px 16px 12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    overflow:hidden;
+  }
+  .head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-shrink:0;
+  }
+  .label{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--ink);
+    margin:0;
+  }
+  .dot{
+    width:6px; height:6px;
+    border-radius:50%;
+    background:#2fae5c;
+    box-shadow:0 0 0 3px rgba(47,174,92,0.18);
+    flex-shrink:0;
+  }
+  .refresh{
+    border:0;
+    background:none;
+    cursor:pointer;
+    color:var(--ink-soft);
+    padding:4px;
+    border-radius:6px;
+    display:grid;
+    place-items:center;
+    transition:background .15s, color .15s;
+  }
+  .refresh:hover{ background:var(--panel); color:var(--red); }
+  .refresh svg{ width:14px; height:14px; }
+  .refresh.spin svg{ animation:spin .7s linear; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  .head{display:flex; align-items:center; gap:8px; margin-bottom:12px;}
-  .live-dot{width:7px;height:7px;border-radius:50%; background:var(--good); flex-shrink:0; animation:pulse 1.8s ease-in-out infinite;}
-  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-  @media (prefers-reduced-motion: reduce){ .live-dot{animation:none;} }
-  .head-title{
-    font-family:'IBM Plex Mono'; font-size:11px; font-weight:700; letter-spacing:0.1em;
-    text-transform:uppercase; color:var(--ink);
+  .scroll{
+    flex:1;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding-right:2px;
   }
-  .last-checked{
-    font-family:'IBM Plex Mono'; font-size:9.5px; color:var(--steel); margin-left:auto;
-  }
-  .refresh-btn{
-    width:24px; height:24px; border-radius:50%; border:1px solid var(--line);
-    background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--steel);
-  }
-  .refresh-btn:hover{color:var(--petra-red); border-color:var(--petra-red);}
-  .refresh-btn svg{width:12px;height:12px;}
-  .refresh-btn.spinning svg{animation:spin 0.7s linear infinite;}
-  @keyframes spin{ to{transform:rotate(360deg);} }
 
-  /* hero */
+  /* --- hero carousel --- */
   .hero{
-    position:relative; border-radius:8px; overflow:hidden; min-height:190px;
-    display:flex; align-items:flex-end; background:var(--navy); margin-bottom:16px;
+    position:relative;
+    flex-shrink:0;
+    height:150px;
+    border-radius:10px;
+    overflow:hidden;
+    background:var(--red);
   }
-  .hero img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.85;}
-  .hero-scrim{position:absolute; inset:0; background:linear-gradient(0deg, rgba(6,14,20,0.92) 0%, rgba(6,14,20,0.25) 60%, transparent 100%);}
+  .hero-slide{
+    position:absolute; inset:0;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .55s ease;
+  }
+  .hero-slide.active{ opacity:1; pointer-events:auto; }
+  .hero-img{
+    position:absolute; inset:0;
+    background:center/cover no-repeat;
+    transform:scale(1);
+    transition:transform 6s ease;
+  }
+  .hero-slide.active .hero-img{ transform:scale(1.08); }
+  .hero-slide::before{
+    content:'';
+    position:absolute; inset:0;
+    background:linear-gradient(to top, rgba(20,10,12,0.88) 0%, rgba(20,10,12,0.32) 48%, transparent 75%);
+  }
   .hero-tag{
-    position:absolute; top:10px; left:10px; z-index:2;
-    font-family:'IBM Plex Mono'; font-size:9.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;
-    color:#fff; background:var(--petra-red); padding:3px 9px; border-radius:3px;
+    position:absolute;
+    top:10px; left:10px;
+    background:var(--red);
+    color:#fff;
+    font-family:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:5px;
+    z-index:1;
   }
-  .hero-body{position:relative; z-index:1; padding:14px 16px;}
-  .hero-title{font-size:15px; font-weight:700; color:#fff; margin:0 0 5px; line-height:1.35;}
-  .hero-meta{font-size:11px; color:#C9D2D8;}
+  .hero-body{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:10px 12px;
+    color:#fff;
+    text-decoration:none;
+  }
+  .hero-title{
+    font-size:14px;
+    font-weight:700;
+    line-height:1.3;
+    margin:0 0 4px;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .hero-meta{
+    font-size:10.5px;
+    color:rgba(255,255,255,0.85);
+    font-weight:600;
+  }
+  .hero-dots{
+    position:absolute;
+    bottom:9px; right:11px;
+    display:flex;
+    gap:5px;
+    z-index:2;
+  }
+  .hero-dots button{
+    width:6px; height:6px;
+    padding:0;
+    border:0;
+    border-radius:3px;
+    background:rgba(255,255,255,0.45);
+    cursor:pointer;
+    transition:width .2s, background .2s;
+  }
+  .hero-dots button.active{
+    width:16px;
+    background:#fff;
+  }
 
-  .section-label{
-    font-family:'IBM Plex Mono'; font-size:10px; font-weight:700; letter-spacing:0.08em;
-    text-transform:uppercase; color:var(--steel); margin:0 0 10px;
+  .sub-label{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:0;
   }
 
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-  @media (max-width:420px){ .grid{grid-template-columns:1fr;} }
-  .g-card{
-    border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel);
-    transition:border-color .15s, transform .15s;
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
   }
-  .g-card:hover{border-color:var(--petra-red); transform:translateY(-1px);}
-  .g-card img{width:100%; height:78px; object-fit:cover; display:block; background:var(--line);}
-  .g-body{padding:9px 11px 11px;}
-  .g-tag{
-    font-family:'IBM Plex Mono'; font-size:9px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;
-    color:var(--petra-red); margin-bottom:4px; display:block;
+  a.card{
+    display:flex;
+    flex-direction:column;
+    border-radius:8px;
+    overflow:hidden;
+    background:var(--panel);
+    border:1px solid var(--line);
+    text-decoration:none;
+    color:var(--ink);
+    transition:border-color .15s, background .15s;
+    opacity:0;
+    animation:tile-in .4s ease forwards;
+    animation-delay:calc(var(--i, 0) * 60ms + 60ms);
   }
-  .g-title{font-size:12px; font-weight:600; line-height:1.35; margin:0 0 5px; color:var(--ink);}
-  .g-meta{font-size:10px; color:var(--steel);}
+  a.card:hover{
+    border-color:var(--red);
+    background:#fdeef0;
+  }
+  .card-img{
+    height:64px;
+    background:var(--red) center/cover no-repeat;
+    display:grid;
+    place-items:center;
+    flex-shrink:0;
+  }
+  .card-img svg{ width:18px; height:18px; opacity:0.9; }
+  .card-body{ padding:7px 9px 8px; }
+  .card-title{
+    font-size:11px;
+    font-weight:600;
+    line-height:1.3;
+    margin:0 0 4px;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .card-meta{
+    font-size:9px;
+    color:var(--red);
+    font-weight:600;
+  }
+  @keyframes tile-in{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
 
-  .empty, .err{padding:24px 10px; text-align:center; font-size:12px; color:var(--steel);}
+  .status{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    padding:10px 2px;
+    text-align:center;
+  }
+
+  .skeleton{
+    border-radius:8px;
+    background:linear-gradient(100deg, var(--panel) 30%, #f2e4e6 50%, var(--panel) 70%);
+    background-size:220% 100%;
+    animation:shimmer 1.3s ease-in-out infinite;
+  }
+  @keyframes shimmer{
+    0%{ background-position:120% 0; }
+    100%{ background-position:-20% 0; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .skeleton{ animation:none; }
+    .refresh.spin svg{ animation:none; }
+    a.card{ opacity:1; animation:none; }
+    .hero-img{ transition:none; }
+    .hero-slide.active .hero-img{ transform:none; }
+  }
 </style>
 </head>
 <body>
 
-<div class="wrap">
+<div class="panel">
   <div class="head">
-    <span class="live-dot"></span>
-    <span class="head-title">Tech &amp; Infra News &mdash; Live Feed</span>
-    <span class="last-checked" id="lastChecked"></span>
-    <button class="refresh-btn" id="refreshBtn" aria-label="Refresh">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.5 6"/><path d="M20 4v7h-7"/></svg>
+    <p class="label"><span class="dot"></span>Tech &amp; Infra News — Live Feed</p>
+    <button class="refresh" id="refreshBtn" title="Refresh now" aria-label="Refresh now">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v5h-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
-
-  <div id="content">
-    <div class="empty">Loading latest infrastructure news&hellip;</div>
+  <div class="scroll" id="scroll">
+    <div class="skeleton" style="height:150px"></div>
+    <div class="skeleton" style="height:14px; width:40%"></div>
+    <div class="grid">
+      <div class="skeleton" style="height:112px"></div>
+      <div class="skeleton" style="height:112px"></div>
+      <div class="skeleton" style="height:112px"></div>
+      <div class="skeleton" style="height:112px"></div>
+    </div>
   </div>
 </div>
 
 <script>
-/* ===========================================================
-   SOURCE: The Register's "On-Prem" feed — servers, networks,
-   storage, HPC, systems. Genuinely infra-focused, not AI hype.
-   Swap FEED_URL for any other Register section (see list below)
-   or a different RSS source entirely if you'd prefer.
+(function(){
+  /* ===========================================================
+     SOURCE: The Register — specific, consistently-tagged
+     subcategories merged together for broad infra coverage.
+     (The broad parent tag "on_prem" is applied inconsistently
+     and surfaces stale articles, so we use leaf tags instead.)
 
-   Other Register sections you could swap in:
-   - Security:   tag:security
-   - Off-Prem (cloud/edge/SaaS): tag:off_prem
-   - Networks only: tag:networks
-   - Storage only: tag:storage
-=========================================================== */
-// Multiple specific, consistently-tagged subcategories, merged together for
-// broader "infra" coverage than any single tag alone. Add/remove freely —
-// see the full list in the comment block below.
-const REGISTER_TAGS = ['networks', 'systems', 'storage'];
+     Other tags you could add/swap: hpc, "personal tech", security,
+     "cyber-crime", off_prem, "edge and iot", "paas and iaas", saas,
+     devops, virtualization
+  =========================================================== */
+  var REGISTER_TAGS = ['networks', 'systems', 'storage'];
 
-/* Other available Register subcategory tags you could swap in:
-   hpc, "personal tech", security, "cyber-crime", off_prem, "edge and iot",
-   "paas and iaas", saas, devops, virtualization                          */
-
-function buildFeedUrl(tag){
-  return `https://api.theregister.com/api/v1/article?query=tag:${encodeURIComponent(tag)}&orderBy=published&site_id=2&remapper=rss&limit=8&_cb=${Date.now()}`;
-}
-function buildProxyUrl(tag){
-  return 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(buildFeedUrl(tag));
-}
-
-function timeAgo(dateStr){
-  const diffMs = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if(mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if(hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-}
-
-function extractImage(item){
-  if(item.thumbnail) return item.thumbnail;
-  const match = (item.description || item.content || '').match(/<img[^>]+src="([^"]+)"/);
-  return match ? match[1] : null;
-}
-
-function categoryFromItem(item){
-  if(item.categories && item.categories.length) return item.categories[0];
-  return 'Infra';
-}
-
-function render(items){
-  const content = document.getElementById('content');
-  if(!items.length){
-    content.innerHTML = '<div class="empty">No stories available right now.</div>';
-    return;
+  function feedUrl(tag){
+    return 'https://api.theregister.com/api/v1/article?query=tag:' + encodeURIComponent(tag) +
+      '&orderBy=published&site_id=2&remapper=rss&limit=8&_cb=' + Date.now();
   }
-  const hero = items[0];
-  const rest = items.slice(1, 7);
-  const heroImg = extractImage(hero);
+  function proxyUrl(tag){
+    return 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl(tag));
+  }
 
-  content.innerHTML = `
-    <a class="hero" href="${hero.link}" target="_blank" rel="noopener">
-      ${heroImg ? `<img src="${heroImg}" alt="" onerror="this.style.display='none'">` : ''}
-      <div class="hero-scrim"></div>
-      <span class="hero-tag">${categoryFromItem(hero)}</span>
-      <div class="hero-body">
-        <p class="hero-title">${hero.title}</p>
-        <div class="hero-meta">${hero.author || 'The Register'} &bull; ${timeAgo(hero.pubDate)}</div>
-      </div>
-    </a>
+  var scroll = document.getElementById('scroll');
+  var refreshBtn = document.getElementById('refreshBtn');
+  var heroTimer = null;
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    <p class="section-label">More Infra News</p>
-    <div class="grid">
-      ${rest.map(item => {
-        const img = extractImage(item);
-        return `
-          <a class="g-card" href="${item.link}" target="_blank" rel="noopener">
-            ${img ? `<img src="${img}" alt="" onerror="this.style.display='none'">` : ''}
-            <div class="g-body">
-              <span class="g-tag">${categoryFromItem(item)}</span>
-              <p class="g-title">${item.title}</p>
-              <div class="g-meta">${timeAgo(item.pubDate)}</div>
-            </div>
-          </a>
-        `;
-      }).join('')}
-    </div>
-  `;
-}
+  function timeAgo(dateStr){
+    var diff = Date.now() - new Date(dateStr).getTime();
+    var mins = Math.floor(diff / 60000);
+    if (mins < 60) return mins + 'm ago';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
 
-async function loadFeed(){
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
-  try{
-    const responses = await Promise.all(
-      REGISTER_TAGS.map(tag =>
-        fetch(buildProxyUrl(tag), { cache: 'no-store' })
-          .then(res => res.ok ? res.json() : null)
-          .catch(() => null)
-      )
-    );
+  function extractImage(item){
+    var html = item.content || item.description || '';
+    var match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+    return match ? match[1] : '';
+  }
 
-    let items = [];
-    responses.forEach(data => {
-      if(data && data.status === 'ok' && Array.isArray(data.items)){
-        items = items.concat(data.items);
+  function imageFor(item){
+    return item.thumbnail || (item.enclosure && item.enclosure.link) || extractImage(item) || '';
+  }
+
+  function buildHero(items){
+    var hero = document.createElement('div');
+    hero.className = 'hero';
+
+    items.forEach(function(item, i){
+      var slide = document.createElement('a');
+      slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
+      slide.href = item.link;
+      slide.target = '_blank';
+      slide.rel = 'noopener';
+
+      var imgEl = document.createElement('div');
+      imgEl.className = 'hero-img';
+      var img = imageFor(item);
+      if (img) imgEl.style.backgroundImage = 'url(' + img + ')';
+      slide.appendChild(imgEl);
+
+      if (item.categories && item.categories[0]){
+        var tag = document.createElement('span');
+        tag.className = 'hero-tag';
+        tag.textContent = item.categories[0];
+        slide.appendChild(tag);
       }
+
+      var body = document.createElement('div');
+      body.className = 'hero-body';
+      var title = document.createElement('p');
+      title.className = 'hero-title';
+      title.textContent = item.title;
+      var meta = document.createElement('div');
+      meta.className = 'hero-meta';
+      meta.textContent = (item.author || 'The Register') + ' · ' + timeAgo(item.pubDate);
+      body.appendChild(title);
+      body.appendChild(meta);
+      slide.appendChild(body);
+
+      hero.appendChild(slide);
     });
 
-    if(!items.length) throw new Error('no items from any feed');
-
-    // de-dupe by link, then sort newest first across all merged feeds
-    const seen = new Set();
-    items = items.filter(item => {
-      if(seen.has(item.link)) return false;
-      seen.add(item.link);
-      return true;
+    var dots = document.createElement('div');
+    dots.className = 'hero-dots';
+    items.forEach(function(item, i){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = i === 0 ? 'active' : '';
+      b.setAttribute('aria-label', 'Show story ' + (i + 1));
+      b.addEventListener('click', function(){ goToSlide(hero, i); });
+      dots.appendChild(b);
     });
-    items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+    hero.appendChild(dots);
 
-    render(items.slice(0, 13));
-  }catch(e){
-    document.getElementById('content').innerHTML =
-      '<div class="err">Couldn\'t load the live feed right now (network may be restricted). Try the refresh button, or check your network/CSP settings allow api.rss2json.com and api.theregister.com.</div>';
-  }finally{
-    btn.classList.remove('spinning');
-    document.getElementById('lastChecked').textContent =
-      'Checked ' + new Date().toLocaleTimeString('en-MY', { hour:'2-digit', minute:'2-digit' });
+    if (!reduced){
+      hero.addEventListener('mouseenter', function(){ clearInterval(heroTimer); });
+      hero.addEventListener('mouseleave', function(){ startAutoRotate(hero, items.length); });
+      startAutoRotate(hero, items.length);
+    }
+
+    return hero;
   }
-}
 
-document.getElementById('refreshBtn').addEventListener('click', loadFeed);
-loadFeed();
-setInterval(loadFeed, 15 * 60 * 1000); // refresh every 15 minutes
+  function goToSlide(hero, index){
+    var slides = hero.querySelectorAll('.hero-slide');
+    var dots = hero.querySelectorAll('.hero-dots button');
+    slides.forEach(function(s, i){ s.classList.toggle('active', i === index); });
+    dots.forEach(function(d, i){ d.classList.toggle('active', i === index); });
+    hero.dataset.current = index;
+  }
+
+  function startAutoRotate(hero, count){
+    clearInterval(heroTimer);
+    heroTimer = setInterval(function(){
+      var current = parseInt(hero.dataset.current || '0', 10);
+      goToSlide(hero, (current + 1) % count);
+    }, 5500);
+  }
+
+  function buildCard(item, index){
+    var a = document.createElement('a');
+    a.className = 'card';
+    a.style.setProperty('--i', index);
+    a.href = item.link;
+    a.target = '_blank';
+    a.rel = 'noopener';
+
+    var imgWrap = document.createElement('div');
+    imgWrap.className = 'card-img';
+    var img = imageFor(item);
+    if (img){
+      imgWrap.style.backgroundImage = 'url(' + img + ')';
+    } else {
+      imgWrap.innerHTML = '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="12" rx="1.5" stroke="#fff" stroke-width="1.6"/><path d="M2 19h20" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>';
+    }
+
+    var body = document.createElement('div');
+    body.className = 'card-body';
+    var title = document.createElement('p');
+    title.className = 'card-title';
+    title.textContent = item.title;
+    var meta = document.createElement('div');
+    meta.className = 'card-meta';
+    meta.textContent = timeAgo(item.pubDate);
+    body.appendChild(title);
+    body.appendChild(meta);
+
+    a.appendChild(imgWrap);
+    a.appendChild(body);
+    return a;
+  }
+
+  function render(items){
+    scroll.innerHTML = '';
+    if (!items.length) return;
+
+    clearInterval(heroTimer);
+    scroll.appendChild(buildHero(items.slice(0, 3)));
+
+    var sub = document.createElement('p');
+    sub.className = 'sub-label';
+    sub.textContent = 'More infra news';
+    scroll.appendChild(sub);
+
+    var grid = document.createElement('div');
+    grid.className = 'grid';
+    items.slice(3, 9).forEach(function(item, i){
+      grid.appendChild(buildCard(item, i));
+    });
+    scroll.appendChild(grid);
+  }
+
+  function showStatus(msg){
+    clearInterval(heroTimer);
+    scroll.innerHTML = '<div class="status">' + msg + '</div>';
+  }
+
+  function load(){
+    refreshBtn.classList.add('spin');
+
+    Promise.all(
+      REGISTER_TAGS.map(function(tag){
+        return fetch(proxyUrl(tag), { cache: 'no-store' })
+          .then(function(res){ return res.ok ? res.json() : null; })
+          .catch(function(){ return null; });
+      })
+    ).then(function(responses){
+      var items = [];
+      responses.forEach(function(data){
+        if (data && data.status === 'ok' && Array.isArray(data.items)){
+          items = items.concat(data.items);
+        }
+      });
+      if (!items.length) throw new Error('empty');
+
+      var seen = {};
+      items = items.filter(function(item){
+        if (seen[item.link]) return false;
+        seen[item.link] = true;
+        return true;
+      });
+      items.sort(function(a, b){ return new Date(b.pubDate) - new Date(a.pubDate); });
+
+      render(items.slice(0, 9));
+    }).catch(function(){
+      showStatus('Couldn’t load the latest infra news right now — try the refresh button, or check back later.');
+    }).finally(function(){
+      setTimeout(function(){ refreshBtn.classList.remove('spin'); }, 500);
+    });
+  }
+
+  refreshBtn.addEventListener('click', load);
+  load();
+  setInterval(load, 20 * 60 * 1000);
+})();
 </script>
-
 </body>
 </html>

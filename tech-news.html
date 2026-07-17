@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tech &amp; Infra News</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --petra-red: #B41F2E;
+    --navy: #0C1B26;
+    --ink: #1B1F23;
+    --steel: #5A6B78;
+    --line: #E9E0DE;
+    --panel: #FBF5F6;
+    --good: #1E7A4C;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:transparent;}
+  body{font-family:'IBM Plex Sans', system-ui, sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:640px; margin:0 auto;}
+
+  .head{display:flex; align-items:center; gap:8px; margin-bottom:12px;}
+  .live-dot{width:7px;height:7px;border-radius:50%; background:var(--good); flex-shrink:0; animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  @media (prefers-reduced-motion: reduce){ .live-dot{animation:none;} }
+  .head-title{
+    font-family:'IBM Plex Mono'; font-size:11px; font-weight:700; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--ink);
+  }
+  .last-checked{
+    font-family:'IBM Plex Mono'; font-size:9.5px; color:var(--steel); margin-left:auto;
+  }
+  .refresh-btn{
+    width:24px; height:24px; border-radius:50%; border:1px solid var(--line);
+    background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--steel);
+  }
+  .refresh-btn:hover{color:var(--petra-red); border-color:var(--petra-red);}
+  .refresh-btn svg{width:12px;height:12px;}
+  .refresh-btn.spinning svg{animation:spin 0.7s linear infinite;}
+  @keyframes spin{ to{transform:rotate(360deg);} }
+
+  /* hero */
+  .hero{
+    position:relative; border-radius:8px; overflow:hidden; min-height:190px;
+    display:flex; align-items:flex-end; background:var(--navy); margin-bottom:16px;
+  }
+  .hero img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.85;}
+  .hero-scrim{position:absolute; inset:0; background:linear-gradient(0deg, rgba(6,14,20,0.92) 0%, rgba(6,14,20,0.25) 60%, transparent 100%);}
+  .hero-tag{
+    position:absolute; top:10px; left:10px; z-index:2;
+    font-family:'IBM Plex Mono'; font-size:9.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;
+    color:#fff; background:var(--petra-red); padding:3px 9px; border-radius:3px;
+  }
+  .hero-body{position:relative; z-index:1; padding:14px 16px;}
+  .hero-title{font-size:15px; font-weight:700; color:#fff; margin:0 0 5px; line-height:1.35;}
+  .hero-meta{font-size:11px; color:#C9D2D8;}
+
+  .section-label{
+    font-family:'IBM Plex Mono'; font-size:10px; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--steel); margin:0 0 10px;
+  }
+
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media (max-width:420px){ .grid{grid-template-columns:1fr;} }
+  .g-card{
+    border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel);
+    transition:border-color .15s, transform .15s;
+  }
+  .g-card:hover{border-color:var(--petra-red); transform:translateY(-1px);}
+  .g-card img{width:100%; height:78px; object-fit:cover; display:block; background:var(--line);}
+  .g-body{padding:9px 11px 11px;}
+  .g-tag{
+    font-family:'IBM Plex Mono'; font-size:9px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;
+    color:var(--petra-red); margin-bottom:4px; display:block;
+  }
+  .g-title{font-size:12px; font-weight:600; line-height:1.35; margin:0 0 5px; color:var(--ink);}
+  .g-meta{font-size:10px; color:var(--steel);}
+
+  .empty, .err{padding:24px 10px; text-align:center; font-size:12px; color:var(--steel);}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="head">
+    <span class="live-dot"></span>
+    <span class="head-title">Tech &amp; Infra News &mdash; Live Feed</span>
+    <span class="last-checked" id="lastChecked"></span>
+    <button class="refresh-btn" id="refreshBtn" aria-label="Refresh">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 10-2.5 6"/><path d="M20 4v7h-7"/></svg>
+    </button>
+  </div>
+
+  <div id="content">
+    <div class="empty">Loading latest infrastructure news&hellip;</div>
+  </div>
+</div>
+
+<script>
+/* ===========================================================
+   SOURCE: The Register's "On-Prem" feed — servers, networks,
+   storage, HPC, systems. Genuinely infra-focused, not AI hype.
+   Swap FEED_URL for any other Register section (see list below)
+   or a different RSS source entirely if you'd prefer.
+
+   Other Register sections you could swap in:
+   - Security:   tag:security
+   - Off-Prem (cloud/edge/SaaS): tag:off_prem
+   - Networks only: tag:networks
+   - Storage only: tag:storage
+=========================================================== */
+// Multiple specific, consistently-tagged subcategories, merged together for
+// broader "infra" coverage than any single tag alone. Add/remove freely —
+// see the full list in the comment block below.
+const REGISTER_TAGS = ['networks', 'systems', 'storage'];
+
+/* Other available Register subcategory tags you could swap in:
+   hpc, "personal tech", security, "cyber-crime", off_prem, "edge and iot",
+   "paas and iaas", saas, devops, virtualization                          */
+
+function buildFeedUrl(tag){
+  return `https://api.theregister.com/api/v1/article?query=tag:${encodeURIComponent(tag)}&orderBy=published&site_id=2&remapper=rss&limit=8&_cb=${Date.now()}`;
+}
+function buildProxyUrl(tag){
+  return 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(buildFeedUrl(tag));
+}
+
+function timeAgo(dateStr){
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if(mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if(hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+function extractImage(item){
+  if(item.thumbnail) return item.thumbnail;
+  const match = (item.description || item.content || '').match(/<img[^>]+src="([^"]+)"/);
+  return match ? match[1] : null;
+}
+
+function categoryFromItem(item){
+  if(item.categories && item.categories.length) return item.categories[0];
+  return 'Infra';
+}
+
+function render(items){
+  const content = document.getElementById('content');
+  if(!items.length){
+    content.innerHTML = '<div class="empty">No stories available right now.</div>';
+    return;
+  }
+  const hero = items[0];
+  const rest = items.slice(1, 7);
+  const heroImg = extractImage(hero);
+
+  content.innerHTML = `
+    <a class="hero" href="${hero.link}" target="_blank" rel="noopener">
+      ${heroImg ? `<img src="${heroImg}" alt="" onerror="this.style.display='none'">` : ''}
+      <div class="hero-scrim"></div>
+      <span class="hero-tag">${categoryFromItem(hero)}</span>
+      <div class="hero-body">
+        <p class="hero-title">${hero.title}</p>
+        <div class="hero-meta">${hero.author || 'The Register'} &bull; ${timeAgo(hero.pubDate)}</div>
+      </div>
+    </a>
+
+    <p class="section-label">More Infra News</p>
+    <div class="grid">
+      ${rest.map(item => {
+        const img = extractImage(item);
+        return `
+          <a class="g-card" href="${item.link}" target="_blank" rel="noopener">
+            ${img ? `<img src="${img}" alt="" onerror="this.style.display='none'">` : ''}
+            <div class="g-body">
+              <span class="g-tag">${categoryFromItem(item)}</span>
+              <p class="g-title">${item.title}</p>
+              <div class="g-meta">${timeAgo(item.pubDate)}</div>
+            </div>
+          </a>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+async function loadFeed(){
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  try{
+    const responses = await Promise.all(
+      REGISTER_TAGS.map(tag =>
+        fetch(buildProxyUrl(tag), { cache: 'no-store' })
+          .then(res => res.ok ? res.json() : null)
+          .catch(() => null)
+      )
+    );
+
+    let items = [];
+    responses.forEach(data => {
+      if(data && data.status === 'ok' && Array.isArray(data.items)){
+        items = items.concat(data.items);
+      }
+    });
+
+    if(!items.length) throw new Error('no items from any feed');
+
+    // de-dupe by link, then sort newest first across all merged feeds
+    const seen = new Set();
+    items = items.filter(item => {
+      if(seen.has(item.link)) return false;
+      seen.add(item.link);
+      return true;
+    });
+    items.sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+    render(items.slice(0, 13));
+  }catch(e){
+    document.getElementById('content').innerHTML =
+      '<div class="err">Couldn\'t load the live feed right now (network may be restricted). Try the refresh button, or check your network/CSP settings allow api.rss2json.com and api.theregister.com.</div>';
+  }finally{
+    btn.classList.remove('spinning');
+    document.getElementById('lastChecked').textContent =
+      'Checked ' + new Date().toLocaleTimeString('en-MY', { hour:'2-digit', minute:'2-digit' });
+  }
+}
+
+document.getElementById('refreshBtn').addEventListener('click', loadFeed);
+loadFeed();
+setInterval(loadFeed, 15 * 60 * 1000); // refresh every 15 minutes
+</script>
+
+</body>
+</html>

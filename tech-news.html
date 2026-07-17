@@ -313,12 +313,28 @@
 
   function extractImage(item){
     var html = item.content || item.description || '';
-    var match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-    return match ? match[1] : '';
+    var matches = html.match(/<img[^>]+src=["']([^"']+)["']/gi) || [];
+    var skipPattern = /(icon|logo|avatar|pixel|1x1|spacer|tracking)/i;
+    for (var i = 0; i < matches.length; i++){
+      var srcMatch = matches[i].match(/src=["']([^"']+)["']/i);
+      if (!srcMatch) continue;
+      var src = srcMatch[1];
+      if (!skipPattern.test(src)) return src;
+    }
+    // fall back to the first image found even if it matched the skip pattern
+    if (matches.length){
+      var first = matches[0].match(/src=["']([^"']+)["']/i);
+      if (first) return first[1];
+    }
+    return '';
   }
 
   function imageFor(item){
-    return item.thumbnail || (item.enclosure && item.enclosure.link) || extractImage(item) || '';
+    // Prefer the image embedded in the article body — it's usually the
+    // full-resolution hero image. The Register's dedicated "thumbnail"
+    // field tends to be smaller, which looks soft/pixelated once
+    // stretched to fill the hero/card via background-size:cover.
+    return extractImage(item) || item.thumbnail || (item.enclosure && item.enclosure.link) || '';
   }
 
   function buildHero(items){

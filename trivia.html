@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Trivia Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --petra-red: #B41F2E;
+    --petra-red-dark: #7C1420;
+    --navy: #0C1B26;
+    --k-red: #E21B3C;
+    --k-blue: #1368CE;
+    --k-yellow: #D89E00;
+    --k-green: #26890C;
+    --ink: #1B1F23;
+    --steel: #5A6B78;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:transparent;}
+  body{font-family:'IBM Plex Sans', system-ui, sans-serif; color:var(--ink); -webkit-font-smoothing:antialiased;}
+
+  .frame{max-width:480px; margin:0 auto;}
+  .label{
+    font-family:'IBM Plex Mono'; font-size:11px; font-weight:700; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--ink); margin:0 0 10px; display:flex; align-items:center; gap:8px;
+  }
+  .label svg{width:14px;height:14px; color:var(--petra-red);}
+  .label .badge-count{
+    margin-left:auto; font-family:'IBM Plex Mono'; font-size:9.5px; font-weight:700;
+    color:var(--petra-red); background:#FBEAE9; padding:2px 8px; border-radius:10px;
+  }
+
+  /* ---------- CARD WITH PHOTO BACKGROUND ---------- */
+  .card{
+    position:relative; overflow:hidden; border-radius:14px;
+    min-height:420px; display:flex; flex-direction:column;
+    background:var(--navy);
+    box-shadow:0 8px 22px rgba(12,27,38,0.3);
+  }
+  .card-photo{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0.55;
+  }
+  .card-scrim{
+    position:absolute; inset:0;
+    background: linear-gradient(180deg, rgba(12,27,38,0.88) 0%, rgba(12,27,38,0.80) 45%, rgba(12,27,38,0.94) 100%);
+  }
+  .card-inner{position:relative; z-index:1; padding:18px 18px 16px; display:flex; flex-direction:column; flex:1;}
+
+  /* ---------- TOP BAR: progress / streak / timer ---------- */
+  .top-row{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+  .qdots{display:flex; gap:5px;}
+  .qdot{width:18px; height:6px; border-radius:3px; background:rgba(255,255,255,0.22); transition:background .2s;}
+  .qdot.current{background:#fff;}
+  .qdot.correct{background:#3FCF6E;}
+  .qdot.wrong{background:#F0554E;}
+  .streak{
+    display:flex; align-items:center; gap:4px; font-family:'IBM Plex Mono'; font-size:11px; font-weight:700;
+    color:#FFC940; opacity:0; transition:opacity .2s;
+  }
+  .streak.show{opacity:1;}
+  .score-tag{
+    font-family:'IBM Plex Mono'; font-size:11px; font-weight:700; color:#fff;
+    background:rgba(255,255,255,0.14); padding:3px 10px; border-radius:20px; flex-shrink:0;
+  }
+
+  .timer-track{height:6px; border-radius:3px; background:rgba(255,255,255,0.18); overflow:hidden; margin-bottom:14px;}
+  .timer-fill{height:100%; width:100%; background:linear-gradient(90deg, #FFC940, var(--k-red)); border-radius:3px;}
+
+  .qnum{
+    font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:0.08em; text-transform:uppercase;
+    color:rgba(255,255,255,0.6); margin:0 0 6px;
+  }
+  .qtext{
+    font-size:17px; font-weight:800; line-height:1.35; margin:0 0 16px; color:#fff;
+    min-height:66px; display:flex; align-items:center;
+  }
+
+  /* ---------- KAHOOT-STYLE 2x2 ANSWER GRID ---------- */
+  .options{display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:auto;}
+  .opt{
+    display:flex; align-items:center; gap:9px; text-align:left;
+    border:none; border-radius:8px; padding:13px 11px; cursor:pointer;
+    color:#fff; font-family:'IBM Plex Sans'; font-weight:700; font-size:12.5px; line-height:1.3;
+    transition:transform .1s, filter .15s; min-height:64px;
+  }
+  .opt:active:not(.locked){transform:scale(0.97);}
+  .opt.c0{background:var(--k-red);}
+  .opt.c1{background:var(--k-blue);}
+  .opt.c2{background:var(--k-yellow);}
+  .opt.c3{background:var(--k-green);}
+  .opt .shape{width:20px; height:20px; flex-shrink:0; fill:rgba(255,255,255,0.9);}
+  .opt.locked{cursor:default;}
+  .opt.dim{opacity:0.35; filter:grayscale(0.4);}
+  .opt.reveal-correct{outline:3px solid #fff; opacity:1 !important; filter:none !important;}
+  .opt.reveal-wrong-pick{outline:3px solid rgba(255,255,255,0.6);}
+
+  .explain{
+    font-size:11.5px; color:rgba(255,255,255,0.9); line-height:1.5; margin:12px 0 2px;
+    padding:10px 12px; background:rgba(0,0,0,0.28); border-radius:8px; display:none;
+  }
+  .explain.show{display:block;}
+  .explain .verdict{font-weight:800; display:block; margin-bottom:2px;}
+  .points-popup{
+    position:absolute; top:14px; right:16px; z-index:2;
+    font-family:'Archivo Black'; font-size:20px; color:#FFC940;
+    opacity:0; transform:translateY(6px); transition:opacity .25s, transform .25s;
+    text-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+  .points-popup.show{opacity:1; transform:translateY(0);}
+
+  .next-btn{
+    display:none; margin-top:12px; padding:11px; border:none; border-radius:8px;
+    background:#fff; color:var(--petra-red); font-family:'IBM Plex Sans'; font-size:13px; font-weight:800;
+    cursor:pointer; text-align:center;
+  }
+  .next-btn.show{display:block;}
+  .next-btn:hover{background:#F3D9DB;}
+
+  .result{display:none; text-align:center; padding:30px 10px 10px; flex:1; display:none; flex-direction:column; justify-content:center;}
+  .result.show{display:flex;}
+  .result-emoji{font-size:44px; margin-bottom:8px;}
+  .result-score{font-family:'Archivo Black'; font-size:38px; margin:0 0 2px; color:#FFC940;}
+  .result-sub{font-family:'IBM Plex Mono'; font-size:11px; color:rgba(255,255,255,0.65); margin:0 0 14px;}
+  .result-msg{font-size:13.5px; color:#fff; margin:0 0 18px; line-height:1.5; font-weight:600;}
+  .result-note{
+    font-family:'IBM Plex Mono'; font-size:10px; color:rgba(255,255,255,0.55);
+    text-transform:uppercase; letter-spacing:0.06em;
+  }
+  .quiz-body.hidden{display:none;}
+  .quiz-body{display:flex; flex-direction:column; flex:1; position:relative;}
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <p class="label">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4z"/><path d="M17 5h3a2 2 0 01-2 4M7 5H4a2 2 0 002 4"/></svg>
+    IT Trivia &mdash; Daily Challenge
+    <span class="badge-count" id="dayTag">DAY 1</span>
+  </p>
+
+  <div class="card">
+    <img class="card-photo" id="cardPhoto" alt="">
+    <div class="card-scrim"></div>
+    <div class="card-inner">
+
+      <div class="quiz-body" id="quizBody">
+        <div class="points-popup" id="pointsPopup">+0</div>
+        <div class="top-row">
+          <div class="qdots" id="qdots"></div>
+          <span class="streak" id="streak">&#128293; x0</span>
+          <span class="score-tag" id="scoreTag">0 pts</span>
+        </div>
+        <div class="timer-track"><div class="timer-fill" id="timerFill"></div></div>
+        <p class="qnum" id="qnum">Question 1 of 5</p>
+        <p class="qtext" id="qtext">Loading&hellip;</p>
+        <div class="options" id="options"></div>
+        <div class="explain" id="explain"></div>
+        <button class="next-btn" id="nextBtn">Next Question &rarr;</button>
+      </div>
+
+      <div class="result" id="result">
+        <div class="result-emoji" id="resultEmoji">&#127942;</div>
+        <p class="result-score" id="resultScore">0</p>
+        <p class="result-sub" id="resultSub">POINTS &bull; 0/5 CORRECT</p>
+        <p class="result-msg" id="resultMsg"></p>
+        <p class="result-note">New challenge tomorrow at 8:00 AM</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===========================================================
+   QUESTION BANK — IT / cybersecurity / M365 / computer basics only.
+   Add as many as you like — 5 are picked automatically each day.
+=========================================================== */
+const BANK = [
+  { q:"What does MFA stand for?", opts:["Multi-Factor Authentication","Managed File Access","Multiple Firewall Access","My First Account"], correct:0, explain:"MFA adds a second proof of identity beyond your password, like a code or approval prompt." },
+  { q:"Which is safer for storing team documents long-term?", opts:["Personal OneDrive","Email attachments","A SharePoint site/library","Desktop folder"], correct:2, explain:"SharePoint libraries are owned by the team, not one person, and keep version history." },
+  { q:"Suspicious email urgently asking to reset your password — what do you do?", opts:["Click the link immediately","Reply asking for more info","Report it as phishing","Forward it to a colleague"], correct:2, explain:"Reporting lets IT block it tenant-wide before others fall for it." },
+  { q:"What's the recommended backup rule for critical files?", opts:["1 copy is enough","2-1-1 rule","3-2-1 rule (3 copies, 2 media, 1 offsite)","Cloud means no backup needed"], correct:2, explain:"3-2-1 protects against device failure, site loss, and accidental deletion all at once." },
+  { q:"Which freezes panes in Excel so headers stay visible?", opts:["View tab \u2192 Freeze Panes","Ctrl+F","Ctrl+Shift+L","Alt+F4"], correct:0, explain:"Freeze Panes keeps your header row/column locked in place while you scroll." },
+  { q:"What does a VPN primarily protect on public Wi-Fi?", opts:["Battery life","Your connection's privacy/encryption","Screen brightness","Keyboard shortcuts"], correct:1, explain:"VPN encrypts traffic between your device and the company network, even on untrusted Wi-Fi." },
+  { q:"You find an unlabeled USB drive on the office floor. Best move?", opts:["Plug it in to check","Hand it to IT","Leave it there","Format it for reuse"], correct:1, explain:"Unknown USB drives are a classic attack vector \u2014 IT can check it safely." },
+  { q:"Risk of reusing the same password everywhere?", opts:["None, if it's strong","One leak compromises every account using it","Slower login speed","Uses more storage"], correct:1, explain:"Credential-stuffing attacks reuse leaked passwords across many sites automatically." },
+  { q:"In Outlook, what does Focused Inbox do?", opts:["Deletes spam automatically","Separates likely-important mail from the rest","Encrypts all emails","Blocks external senders"], correct:1, explain:"It's a sorting aid, not a security feature \u2014 still check the Other tab regularly." },
+  { q:"Why restart your laptop regularly?", opts:["Voids the warranty otherwise","Clears memory leaks and applies pending updates","Deletes your files","Not actually necessary"], correct:1, explain:"A regular restart is one of the simplest fixes for a sluggish machine." },
+  { q:"What is ransomware?", opts:["A software pricing model","Malware that encrypts files and demands payment","A type of firewall","A Wi-Fi protocol"], correct:1, explain:"If you suspect ransomware, disconnect from the network immediately and contact IT." },
+  { q:"Unexpected payment request from 'your manager' by email — best check?", opts:["Reply directly to confirm","Call them on a known number to verify","Process it to be safe","Forward to finance without checking"], correct:1, explain:"Verifying via a separate, known channel defeats email spoofing and BEC scams." },
+  { q:"What does phishing typically try to steal?", opts:["Only your Wi-Fi password","Login credentials or sensitive info","Your monitor's resolution","Nothing, it's just spam"], correct:1, explain:"Phishing impersonates a trusted source to trick you into handing over credentials or data." },
+  { q:"Which is the strongest password approach?", opts:["A short word + number, e.g. pass1","A long passphrase of unrelated words","Your birthdate","password123"], correct:1, explain:"Length beats complexity \u2014 a 4+ word passphrase is strong and easy to remember." },
+  { q:"Before enabling macros on an unexpected Office file, you should:", opts:["Always enable them, it's normal","Verify the sender and purpose first","Forward it to a friend to test","Just rename the file"], correct:1, explain:"Malicious macros are a common malware delivery method \u2014 verify first." },
+  { q:"OneDrive vs SharePoint, in one line?", opts:["Exactly the same thing","OneDrive is personal, SharePoint is for teams","SharePoint is for photos only","OneDrive needs no internet"], correct:1, explain:"Use OneDrive for your own working files, SharePoint for anything a team owns together." },
+  { q:"Why avoid auto-connecting to open public Wi-Fi?", opts:["Drains battery faster","Attackers can set up rogue lookalike networks","It's against the law","Slows your phone's clock"], correct:1, explain:"A rogue hotspot can intercept your traffic \u2014 prefer a mobile hotspot or VPN." },
+  { q:"What's the Company Portal / Software Center for?", opts:["Watching training videos","Installing pre-approved software safely","Booking meeting rooms","Resetting your password"], correct:1, explain:"It's the safe, IT-approved way to get new software without random installers." },
+  { q:"Device shows signs of malware. First step?", opts:["Keep working, it'll pass","Disconnect from network/Wi-Fi and contact IT","Restart repeatedly","Delete random files"], correct:1, explain:"Isolating the device first prevents malware from spreading across the network." },
+  { q:"What does Ctrl+T do in Excel?", opts:["Opens a new tab","Converts a range into a formatted Table","Deletes the current row","Freezes panes"], correct:1, explain:"Tables auto-expand formulas and filters as you add data." },
+  { q:"Which is a sign of a phishing email?", opts:["Matches your company's usual tone perfectly","Creates urgency to act right now","Comes from a colleague you email often","Has no links at all"], correct:1, explain:"Urgency and fear (\"act now or lose access\") is a classic manipulation tactic." },
+  { q:"Old company documents you no longer need should be:", opts:["Left anywhere on your desktop","Handled per your data retention/disposal policy","Emailed to your personal address","Printed out"], correct:1, explain:"Following the retention policy avoids both clutter and compliance risk." },
+  { q:"Good password manager habit?", opts:["Write passwords in a desk notebook","Store unique passwords per system in a manager","Reuse one strong password everywhere","Share your master password 'just in case'"], correct:1, explain:"A password manager lets you use a unique strong password per system easily." },
+  { q:"What does 'Safely Remove Hardware' do before unplugging a USB drive?", opts:["Nothing important","Ensures all writes finish so files aren't corrupted","Charges the drive faster","Encrypts the drive"], correct:1, explain:"Unplugging mid-write can corrupt files still being saved to the drive." },
+  { q:"Why keep laptop vents unobstructed?", opts:["Looks neater","Airflow prevents overheating and throttling","Charges faster","Reduces screen glare"], correct:1, explain:"Blocked vents cause heat buildup, which can throttle performance over time." },
+  { q:"Reasonable first step for a slow computer before logging a ticket?", opts:["Buy a new laptop","Restart it and close unused apps/tabs","Ignore it","Uninstall the OS"], correct:1, explain:"A restart plus closing unused apps resolves a large share of slow-computer cases." },
+  { q:"Before connecting to office Wi-Fi with a new device, check:", opts:["Nothing, just connect","You're using correct credentials and accepting the right certificate","The device's paint color","Your lunch schedule"], correct:1, explain:"Accepting an unexpected certificate on the wrong network can expose credentials." }
+];
+
+const QUESTIONS_PER_DAY = 5;
+const TIME_PER_Q = 15; // seconds
+const SHAPES = [
+  '<svg class="shape" viewBox="0 0 24 24"><path d="M12 3l10 18H2z"/></svg>',
+  '<svg class="shape" viewBox="0 0 24 24"><path d="M12 2l10 10-10 10L2 12z"/></svg>',
+  '<svg class="shape" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>',
+  '<svg class="shape" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>'
+];
+
+/* ---------------------------------------------------------
+   Photo backgrounds — Wikimedia Commons (verified open-license,
+   same set used in the IT Digest widget), picked per day.
+--------------------------------------------------------- */
+const BG_PHOTOS = [
+  'Closed lock on laptop (49918711713).jpg',
+  'Laptop computer monitor (Unsplash).jpg',
+  'Datacenter.jpg',
+  'Laptop computer.jpg',
+  'Laptop.jpg',
+  'BalticServers data center.jpg',
+  'Wireless network.jpg',
+  'USB Stick.jpg'
+];
+function commonsUrl(filename){
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename.replace(/ /g,'_'))}?width=900`;
+}
+
+/* ---------------------------------------------------------
+   8:00 AM DAILY ROLLOVER — same pattern as the IT Digest card.
+   Before 8 AM the "effective day" is still yesterday.
+--------------------------------------------------------- */
+function effectiveDate(){
+  const now = new Date();
+  const eff = new Date(now);
+  if(now.getHours() < 8) eff.setDate(eff.getDate() - 1);
+  eff.setHours(0,0,0,0);
+  return eff;
+}
+function dayOfYear(d){
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function seededShuffle(arr, seed){
+  const rand = mulberry32(seed);
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const today = dayOfYear(effectiveDate());
+const shuffledBank = seededShuffle(BANK.map((q, i) => i), today);
+const todaysQuestions = shuffledBank.slice(0, QUESTIONS_PER_DAY).map(i => BANK[i]);
+const todaysPhoto = BG_PHOTOS[today % BG_PHOTOS.length];
+
+document.getElementById('dayTag').textContent = 'DAY ' + today;
+const photoEl = document.getElementById('cardPhoto');
+photoEl.onerror = () => { photoEl.style.display = 'none'; };
+photoEl.src = commonsUrl(todaysPhoto);
+
+/* ---------------------------------------------------------
+   GAME ENGINE — Kahoot-style: countdown timer, speed-based
+   points (up to 500 base + up to 500 speed bonus), streaks.
+--------------------------------------------------------- */
+let current = 0;
+let totalPoints = 0;
+let streak = 0;
+const results = [];
+let timerInterval = null;
+let timeLeft = TIME_PER_Q;
+let answered = false;
+
+function renderDots(){
+  const wrap = document.getElementById('qdots');
+  wrap.innerHTML = todaysQuestions.map((_, i) => {
+    let cls = 'qdot';
+    if(results[i] === 'correct') cls += ' correct';
+    else if(results[i] === 'wrong') cls += ' wrong';
+    else if(i === current) cls += ' current';
+    return `<span class="${cls}"></span>`;
+  }).join('');
+}
+
+function renderStreak(){
+  const el = document.getElementById('streak');
+  if(streak >= 2){
+    el.textContent = `\u{1F525} x${streak}`;
+    el.classList.add('show');
+  }else{
+    el.classList.remove('show');
+  }
+}
+
+function startTimer(){
+  clearInterval(timerInterval);
+  timeLeft = TIME_PER_Q;
+  const fill = document.getElementById('timerFill');
+  fill.style.transition = 'none';
+  fill.style.width = '100%';
+  void fill.offsetWidth;
+  fill.style.transition = `width ${TIME_PER_Q}s linear`;
+  requestAnimationFrame(() => { fill.style.width = '0%'; });
+
+  timerInterval = setInterval(() => {
+    timeLeft -= 1;
+    if(timeLeft <= 0){
+      clearInterval(timerInterval);
+      if(!answered) handleAnswer(-1); // time's up, no pick
+    }
+  }, 1000);
+}
+
+function renderQuestion(){
+  answered = false;
+  const q = todaysQuestions[current];
+  document.getElementById('qnum').textContent = `Question ${current + 1} of ${todaysQuestions.length}`;
+  document.getElementById('qtext').textContent = q.q;
+  document.getElementById('scoreTag').textContent = `${totalPoints} pts`;
+  document.getElementById('explain').classList.remove('show');
+  document.getElementById('explain').innerHTML = '';
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('nextBtn').textContent = current === todaysQuestions.length - 1 ? 'See Results \u2192' : 'Next Question \u2192';
+  document.getElementById('pointsPopup').classList.remove('show');
+
+  const optsWrap = document.getElementById('options');
+  optsWrap.innerHTML = q.opts.map((opt, i) => `
+    <button class="opt c${i}" data-i="${i}">
+      ${SHAPES[i]}
+      <span>${opt}</span>
+    </button>
+  `).join('');
+
+  optsWrap.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.i, 10)));
+  });
+
+  renderDots();
+  renderStreak();
+  startTimer();
+}
+
+function handleAnswer(pickedIdx){
+  if(answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+
+  const q = todaysQuestions[current];
+  const optsWrap = document.getElementById('options');
+  const buttons = optsWrap.querySelectorAll('.opt');
+  buttons.forEach(b => b.classList.add('locked'));
+
+  const isCorrect = pickedIdx === q.correct;
+  results[current] = isCorrect ? 'correct' : 'wrong';
+
+  let earned = 0;
+  if(isCorrect){
+    streak += 1;
+    const speedFraction = Math.max(timeLeft, 0) / TIME_PER_Q;
+    earned = Math.round(500 + speedFraction * 500);
+    totalPoints += earned;
+  }else{
+    streak = 0;
+  }
+
+  buttons.forEach((b, i) => {
+    b.onclick = null;
+    if(i === q.correct){
+      b.classList.add('reveal-correct');
+    }else{
+      b.classList.add('dim');
+      if(i === pickedIdx) b.classList.add('reveal-wrong-pick');
+    }
+  });
+
+  const explainEl = document.getElementById('explain');
+  explainEl.innerHTML = `<span class="verdict">${isCorrect ? '\u2713 Correct!' : (pickedIdx === -1 ? '\u23F0 Time\u2019s up!' : '\u2717 Not quite')}</span>${q.explain}`;
+  explainEl.classList.add('show');
+
+  if(earned > 0){
+    const popup = document.getElementById('pointsPopup');
+    popup.textContent = '+' + earned;
+    popup.classList.add('show');
+  }
+
+  document.getElementById('scoreTag').textContent = `${totalPoints} pts`;
+  document.getElementById('nextBtn').classList.add('show');
+  renderDots();
+  renderStreak();
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  current++;
+  if(current >= todaysQuestions.length){
+    showResults();
+  }else{
+    renderQuestion();
+  }
+});
+
+function showResults(){
+  document.getElementById('quizBody').classList.add('hidden');
+  const result = document.getElementById('result');
+  result.classList.add('show');
+  const correctCount = results.filter(r => r === 'correct').length;
+  const total = todaysQuestions.length;
+  document.getElementById('resultScore').textContent = totalPoints.toLocaleString('en-MY');
+  document.getElementById('resultSub').textContent = `POINTS \u2022 ${correctCount}/${total} CORRECT`;
+
+  let emoji, msg;
+  if(correctCount === total){ emoji = '\u{1F3C6}'; msg = 'Perfect score! You know your IT basics cold.'; }
+  else if(correctCount >= Math.ceil(total*0.6)){ emoji = '\u{1F44D}'; msg = 'Solid work \u2014 you\u2019re well ahead of most phishing attempts.'; }
+  else { emoji = '\u{1F4A1}'; msg = 'Good effort \u2014 check the IT Digest card above for a refresher.'; }
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultMsg').textContent = msg;
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>
